@@ -9,6 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+
     <artifactId>avro-schemas</artifactId>
 
     <dependencies>
@@ -26,44 +27,21 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro.version}</version> <!-- Версия берется из родительского pom.xml -->
                 <executions>
                     <execution>
-                        <id>schemas</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>idl-protocol</goal>
+                            <goal>schema</goal>
                         </goals>
                         <configuration>
                             <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <!-- Директория, куда будут помещены сгенерированные классы -->
+                            <outputDirectory>${project.build.directory}/generated-sources/avro/</outputDirectory>
+                            <!-- Используем java.lang.String для строковых типов в Avro -->
                             <stringType>String</stringType>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources</source>
-                            </sources>
                         </configuration>
                     </execution>
                 </executions>
