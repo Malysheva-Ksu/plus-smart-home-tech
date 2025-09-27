@@ -52,38 +52,30 @@
             </plugin>
 
             <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>${protobuf-plugin.version}</version>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <version>3.11.4</version>
                 <executions>
                     <execution>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
+                            <goal>run</goal>
                         </goals>
                         <configuration>
-                            <protocExecutable>C:/protoc/bin/protoc.exe</protocExecutable>  <!-- Укажите полный путь к вашему protoc.exe -->
-                            <protoSourceRoot>${project.basedir}/src/main/protobuf/telemetry/services/</protoSourceRoot>
-                            <outputDirectory>${project.build.directory}/generated-sources/protobuf</outputDirectory>
-                            <clearOutputDirectory>false</clearOutputDirectory>
-                            <pluginId>grpc-java</pluginId>
-                            <!--suppress UnresolvedMavenProperty -->
-                            <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                            <protocVersion>3.19.4</protocVersion>
+                            <inputDirectories>
+                                <include>${project.basedir}/src/main/protobuf/telemetry/services</include>
+                            </inputDirectories>
+                            <outputTargets>
+                                <outputTarget>
+                                    <type>java</type>
+                                    <outputDirectory>${project.build.directory}/generated-sources/protobuf</outputDirectory>
+                                    <addSources>main</addSources>
+                                </outputTarget>
+                            </outputTargets>
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.plexus</groupId>
-                        <artifactId>plexus-utils</artifactId>
-                        <version>3.5.1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.commons</groupId>
-                        <artifactId>commons-exec</artifactId>
-                        <version>1.3</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <plugin>
