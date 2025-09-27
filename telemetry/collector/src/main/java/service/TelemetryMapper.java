@@ -9,6 +9,8 @@ import dto.hub.SensorRegisteredEventDto;
 import dto.sensor.*;
 import org.springframework.stereotype.Component;
 
+import ru.yandex.practicum.kafka.telemetry.event.*;
+
 @Component
 public class TelemetryMapper {
 
@@ -19,7 +21,7 @@ public class TelemetryMapper {
             case SmartSwitchEventDto e -> mapToSmartSwitchEvent(e);
             case ClimateSensorEventDto e -> mapToClimateSensorEvent(e);
             case MotionSensorEventDto e -> mapToMotionSensorEvent(e);
-            default -> throw new IllegalArgumentException("Unsupported SensorEventDto");
+            default -> throw new IllegalArgumentException("Unsupported SensorEventDto type: " + dto.getClass().getName());
         };
         return new SensorData(event);
     }
@@ -30,7 +32,7 @@ public class TelemetryMapper {
             case SensorDeregisteredEventDto e -> mapToSensorDeregisteredEvent(e);
             case ScenarioAddedEventDto e -> mapToScenarioAddedEvent(e);
             case ScenarioRemovedEventDto e -> mapToScenarioRemovedEvent(e);
-            default -> throw new IllegalArgumentException("Unsupported HubEventDto");
+            default -> throw new IllegalArgumentException("Unsupported HubEventDto type: " + dto.getClass().getName());
         };
         return new HubEvent(event);
     }

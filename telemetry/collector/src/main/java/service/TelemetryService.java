@@ -5,6 +5,8 @@ import dto.base.SensorEventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.kafka.telemetry.event.HubEvent;
+import ru.yandex.practicum.kafka.telemetry.event.SensorData;
 
 @Service
 @RequiredArgsConstructor
