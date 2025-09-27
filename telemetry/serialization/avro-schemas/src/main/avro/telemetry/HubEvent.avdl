@@ -1,4 +1,47 @@
 @namespace("ru.yandex.practicum.kafka.telemetry.event")
 protocol HubEventProtocol {
 
+    enum SensorType {
+        LIGHT, TEMPERATURE, SWITCH, CLIMATE, MOTION
+    }
+
+    record SensorRegisteredEvent {
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        string sensorId;
+        SensorType sensorType;
+    }
+
+    record SensorDeregisteredEvent {
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        string sensorId;
+    }
+
+    record ScenarioAddedEvent {
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        string scenarioId;
+        string scenarioName;
+    }
+
+    record ScenarioRemovedEvent {
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        string scenarioId;
+    }
+
+    record HubEvent {
+        union {
+            SensorRegisteredEvent,
+            SensorDeregisteredEvent,
+            ScenarioAddedEvent,
+            ScenarioRemovedEvent
+        } event;
+    }
+
 }

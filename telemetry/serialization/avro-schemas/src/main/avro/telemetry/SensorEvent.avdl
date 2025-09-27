@@ -1,4 +1,63 @@
 @namespace("ru.yandex.practicum.kafka.telemetry.event")
 protocol SensorEventProtocol {
 
+    enum SmartSwitchState {
+        ON, OFF
+    }
+
+    record LightSensorEvent {
+        string id;
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        int linkQuality;
+        int luminosity;
+    }
+
+    record TemperatureSensorEvent {
+        string id;
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        int linkQuality;
+        float temperature;
+    }
+
+    record SmartSwitchEvent {
+        string id;
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        int linkQuality;
+        SmartSwitchState state;
+    }
+
+    record ClimateSensorEvent {
+        string id;
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        int linkQuality;
+        float temperature;
+        float humidity;
+    }
+
+    record MotionSensorEvent {
+        string id;
+        string hubId;
+        @logicalType("timestamp-millis")
+        long timestamp;
+        int linkQuality;
+    }
+
+    record SensorData {
+        union {
+            LightSensorEvent,
+            TemperatureSensorEvent,
+            SmartSwitchEvent,
+            ClimateSensorEvent,
+            MotionSensorEvent
+        } event;
+    }
+
 }
