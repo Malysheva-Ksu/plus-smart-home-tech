@@ -41,7 +41,7 @@ public class TelemetryMapper {
         return LightSensorEvent.newBuilder()
                 .setId(dto.getId())
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setLinkQuality(dto.getLinkQuality())
                 .setLuminosity(dto.getLuminosity())
                 .build();
@@ -51,7 +51,7 @@ public class TelemetryMapper {
         return TemperatureSensorEvent.newBuilder()
                 .setId(dto.getId())
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setLinkQuality(dto.getLinkQuality())
                 .setTemperature(dto.getTemperature())
                 .build();
@@ -63,7 +63,7 @@ public class TelemetryMapper {
         return SmartSwitchEvent.newBuilder()
                 .setId(dto.getId())
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setLinkQuality(dto.getLinkQuality())
                 .setState(avroState)
                 .build();
@@ -73,7 +73,7 @@ public class TelemetryMapper {
         return ClimateSensorEvent.newBuilder()
                 .setId(dto.getId())
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setLinkQuality(dto.getLinkQuality())
                 .setTemperature(dto.getTemperature())
                 .setHumidity(dto.getHumidity())
@@ -84,7 +84,7 @@ public class TelemetryMapper {
         return MotionSensorEvent.newBuilder()
                 .setId(dto.getId())
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setLinkQuality(dto.getLinkQuality())
                 .build();
     }
@@ -94,7 +94,7 @@ public class TelemetryMapper {
 
         return SensorRegisteredEvent.newBuilder()
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setSensorId(dto.getSensorId())
                 .setSensorType(avroSensorType)
                 .build();
@@ -103,7 +103,7 @@ public class TelemetryMapper {
     private SensorDeregisteredEvent mapToSensorDeregisteredEvent(SensorDeregisteredEventDto dto) {
         return SensorDeregisteredEvent.newBuilder()
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setSensorId(dto.getSensorId())
                 .build();
     }
@@ -111,7 +111,7 @@ public class TelemetryMapper {
     private ScenarioAddedEvent mapToScenarioAddedEvent(ScenarioAddedEventDto dto) {
         return ScenarioAddedEvent.newBuilder()
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setScenarioId(dto.getScenarioId())
                 .setScenarioName(dto.getScenarioName())
                 .build();
@@ -120,7 +120,7 @@ public class TelemetryMapper {
     private ScenarioRemovedEvent mapToScenarioRemovedEvent(ScenarioRemovedEventDto dto) {
         return ScenarioRemovedEvent.newBuilder()
                 .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp().toEpochMilli())
+                .setTimestamp(dto.getTimestamp())
                 .setScenarioId(dto.getScenarioId())
                 .build();
     }
