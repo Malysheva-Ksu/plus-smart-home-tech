@@ -18,13 +18,13 @@ public class CollectorController {
 
     private final TelemetryService telemetryService;
 
-    @PostMapping("/sensors/data")
+    @PostMapping("/events/sensors")
     public ResponseEntity<Void> receiveSensorData(@RequestBody SensorEventDto sensorEvent) {
         telemetryService.send(sensorEvent);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    @PostMapping("/hubs/events")
+    @PostMapping("/events/hubs")
     public ResponseEntity<Void> receiveHubEvent(@RequestBody HubEventDto hubEvent) {
         telemetryService.send(hubEvent);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();

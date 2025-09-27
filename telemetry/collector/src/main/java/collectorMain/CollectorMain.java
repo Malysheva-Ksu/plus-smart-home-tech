@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration;
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {
         R2dbcAutoConfiguration.class,
-        R2dbcDataAutoConfiguration.class 
+        R2dbcDataAutoConfiguration.class
 })
 public class CollectorMain {
 
