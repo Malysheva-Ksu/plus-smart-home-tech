@@ -1,11 +1,10 @@
 package service;
 
-import dto.base.*;
-import dto.hub.DeviceAddedEventDto;
-import dto.hub.DeviceRemovedEventDto;
-import dto.hub.ScenarioAddedEventDto;
-import dto.hub.ScenarioRemovedEventDto;
-import dto.sensor.*;
+import dto.abstractDto.HubEventDto;
+import dto.abstractDto.SensorEventDto;
+import dto.nested.*;
+import dto.event.*;
+import dto.hub.*;
 import org.springframework.stereotype.Component;
 
 import ru.yandex.practicum.kafka.telemetry.event.*;

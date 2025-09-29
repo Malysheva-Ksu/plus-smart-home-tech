@@ -1,9 +1,9 @@
 package dto.hub;
 
-import dto.base.DeviceActionDto;
-import dto.base.HubEventDto;
-import dto.base.HubEventType;
-import dto.base.ScenarioConditionDto;
+import dto.abstractDto.HubEventDto;
+import dto.enums.HubEventType;
+import dto.nested.DeviceActionDto;
+import dto.nested.ScenarioConditionDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;

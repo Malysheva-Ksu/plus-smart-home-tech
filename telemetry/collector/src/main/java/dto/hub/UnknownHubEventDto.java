@@ -1,5 +1,7 @@
-package dto.base;
+package dto.hub;
 
+import dto.abstractDto.HubEventDto;
+import dto.enums.HubEventType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

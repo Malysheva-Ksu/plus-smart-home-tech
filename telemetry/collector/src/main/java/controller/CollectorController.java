@@ -1,7 +1,7 @@
 package controller;
 
-import dto.base.HubEventDto;
-import dto.base.SensorEventDto;
+import dto.abstractDto.HubEventDto;
+import dto.abstractDto.SensorEventDto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

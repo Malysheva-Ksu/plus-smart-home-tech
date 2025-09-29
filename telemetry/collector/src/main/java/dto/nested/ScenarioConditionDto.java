@@ -1,5 +1,7 @@
-package dto.base;
+package dto.nested;
 
+import dto.enums.ConditionOperationDto;
+import dto.enums.ConditionTypeDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package dto.sensor;
+package dto.enums;
 
 public enum SmartSwitchStateDto {
     ON,

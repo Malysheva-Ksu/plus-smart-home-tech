@@ -1,4 +1,4 @@
-package dto.base;
+package dto.enums;
 
 public enum ConditionOperationDto {
     EQUALS,

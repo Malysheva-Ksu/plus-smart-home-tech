@@ -1,12 +1,9 @@
-package dto.base;
+package dto.abstractDto;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import dto.sensor.ClimateSensorEventDto;
-import dto.sensor.LightSensorEventDto;
-import dto.sensor.MotionSensorEventDto;
-import dto.sensor.SwitchSensorEventDto;
-import dto.sensor.TemperatureSensorEventDto;
+import dto.enums.SensorEventType;
+import dto.event.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

@@ -1,5 +1,7 @@
-package dto.base;
+package dto.event;
 
+import dto.abstractDto.SensorEventDto;
+import dto.enums.SensorEventType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

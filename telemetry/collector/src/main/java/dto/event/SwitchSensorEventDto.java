@@ -1,7 +1,7 @@
-package dto.sensor;
+package dto.event;
 
-import dto.base.SensorEventDto;
-import dto.base.SensorEventType;
+import dto.abstractDto.SensorEventDto;
+import dto.enums.SensorEventType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotNull;

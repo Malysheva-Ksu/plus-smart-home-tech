@@ -1,5 +1,6 @@
-package dto.base;
+package dto.nested;
 
+import dto.enums.ActionTypeDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

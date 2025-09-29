@@ -1,7 +1,7 @@
 package dto.hub;
 
-import dto.base.HubEventDto;
-import dto.base.HubEventType;
+import dto.abstractDto.HubEventDto;
+import dto.enums.HubEventType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;

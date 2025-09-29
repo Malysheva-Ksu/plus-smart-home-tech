@@ -1,7 +1,7 @@
 package service;
 
-import dto.base.HubEventDto;
-import dto.base.SensorEventDto;
+import dto.abstractDto.HubEventDto;
+import dto.abstractDto.SensorEventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
