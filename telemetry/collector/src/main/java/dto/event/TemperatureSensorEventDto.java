@@ -17,6 +17,6 @@ public class TemperatureSensorEventDto extends SensorEventDto {
 
     @Override
     public SensorEventType getEventType() {
-        return SensorEventType.TEMPERATURE_SENSOR_EVENT;
+        return SensorEventType.TEMPERATURE_SENSOR;
     }
 }

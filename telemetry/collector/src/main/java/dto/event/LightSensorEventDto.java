@@ -17,6 +17,6 @@ public class LightSensorEventDto extends SensorEventDto {
 
     @Override
     public SensorEventType getEventType() {
-        return SensorEventType.LIGHT_SENSOR_EVENT;
+        return SensorEventType.LIGHT_SENSOR;
     }
 }

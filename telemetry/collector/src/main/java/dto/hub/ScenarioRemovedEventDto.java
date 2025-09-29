@@ -14,6 +14,6 @@ public class ScenarioRemovedEventDto extends HubEventDto {
 
     @Override
     public HubEventType getEventType() {
-        return HubEventType.SCENARIO_REMOVED_EVENT;
+        return HubEventType.SCENARIO_REMOVED;
     }
 }

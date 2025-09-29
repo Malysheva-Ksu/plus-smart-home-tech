@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class UnknownSensorEventDto extends SensorEventDto {
     @Override
     public SensorEventType getEventType() {
-        return SensorEventType.UNKNOWN_SENSOR_EVENT;
+        return SensorEventType.UNKNOWN_SENSOR;
     }
 }

@@ -21,6 +21,6 @@ public class MotionSensorEventDto extends SensorEventDto {
 
     @Override
     public SensorEventType getEventType() {
-        return SensorEventType.MOTION_SENSOR_EVENT;
+        return SensorEventType.MOTION_SENSOR;
     }
 }

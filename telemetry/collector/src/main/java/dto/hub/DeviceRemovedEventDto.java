@@ -14,6 +14,6 @@ public class DeviceRemovedEventDto extends HubEventDto {
 
     @Override
     public HubEventType getEventType() {
-        return HubEventType.DEVICE_REMOVED_EVENT;
+        return HubEventType.DEVICE_REMOVED;
     }
 }

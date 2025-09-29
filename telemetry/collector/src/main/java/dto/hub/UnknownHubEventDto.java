@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class UnknownHubEventDto extends HubEventDto {
     @Override
     public HubEventType getEventType() {
-        return HubEventType.UNKNOWN_HUB_EVENT;
+        return HubEventType.UNKNOWN_HUB;
     }
 }

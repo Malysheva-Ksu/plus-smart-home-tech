@@ -14,6 +14,6 @@ public class SwitchSensorEventDto extends SensorEventDto {
 
     @Override
     public SensorEventType getEventType() {
-        return SensorEventType.SWITCH_SENSOR_EVENT;
+        return SensorEventType.SWITCH_SENSOR;
     }
 }

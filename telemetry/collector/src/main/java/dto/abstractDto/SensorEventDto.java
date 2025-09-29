@@ -18,11 +18,11 @@ import java.time.Instant;
         defaultImpl = UnknownSensorEventDto.class
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = LightSensorEventDto.class, name = "LIGHT_SENSOR_EVENT"),
-        @JsonSubTypes.Type(value = TemperatureSensorEventDto.class, name = "TEMPERATURE_SENSOR_EVENT"),
-        @JsonSubTypes.Type(value = SwitchSensorEventDto.class, name = "SWITCH_SENSOR_EVENT"),
-        @JsonSubTypes.Type(value = ClimateSensorEventDto.class, name = "CLIMATE_SENSOR_EVENT"),
-        @JsonSubTypes.Type(value = MotionSensorEventDto.class, name = "MOTION_SENSOR_EVENT")
+        @JsonSubTypes.Type(value = LightSensorEventDto.class, name = "LIGHT_SENSOR"),
+        @JsonSubTypes.Type(value = TemperatureSensorEventDto.class, name = "TEMPERATURE_SENSOR"),
+        @JsonSubTypes.Type(value = SwitchSensorEventDto.class, name = "SWITCH_SENSOR"),
+        @JsonSubTypes.Type(value = ClimateSensorEventDto.class, name = "CLIMATE_SENSOR"),
+        @JsonSubTypes.Type(value = MotionSensorEventDto.class, name = "MOTION_SENSOR")
 })
 public abstract class SensorEventDto {
     @NotBlank

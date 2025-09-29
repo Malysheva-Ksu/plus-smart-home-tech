@@ -18,6 +18,6 @@ public class DeviceAddedEventDto extends HubEventDto {
 
     @Override
     public HubEventType getEventType() {
-        return HubEventType.DEVICE_ADDED_EVENT;
+        return HubEventType.DEVICE_ADDED;
     }
 }
