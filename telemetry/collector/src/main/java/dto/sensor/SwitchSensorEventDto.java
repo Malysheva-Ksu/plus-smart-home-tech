@@ -4,23 +4,16 @@ import dto.base.SensorEventDto;
 import dto.base.SensorEventType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MotionSensorEventDto extends SensorEventDto {
-    @Min(0)
-    private int linkQuality;
-
+public class SwitchSensorEventDto extends SensorEventDto {
     @NotNull
-    private Boolean motion;
-
-    @Min(0)
-    private Integer voltage;
+    private Boolean state;
 
     @Override
     public SensorEventType getEventType() {
-        return SensorEventType.MOTION_SENSOR_EVENT;
+        return SensorEventType.SWITCH_SENSOR_EVENT;
     }
 }

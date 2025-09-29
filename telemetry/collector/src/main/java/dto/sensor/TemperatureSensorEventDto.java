@@ -1,12 +1,22 @@
 package dto.sensor;
 
 import dto.base.SensorEventDto;
+import dto.base.SensorEventType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.NotNull;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class TemperatureSensorEventDto extends SensorEventDto {
-    private int linkQuality;
-    private float temperature;
+    @NotNull
+    private Integer temperatureC;
+
+    @NotNull
+    private Integer temperatureF;
+
+    @Override
+    public SensorEventType getEventType() {
+        return SensorEventType.TEMPERATURE_SENSOR_EVENT;
+    }
 }

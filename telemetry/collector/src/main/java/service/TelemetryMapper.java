@@ -1,127 +1,148 @@
 package service;
 
-import dto.base.HubEventDto;
-import dto.base.SensorEventDto;
+import dto.base.*;
+import dto.hub.DeviceAddedEventDto;
+import dto.hub.DeviceRemovedEventDto;
 import dto.hub.ScenarioAddedEventDto;
 import dto.hub.ScenarioRemovedEventDto;
-import dto.hub.SensorDeregisteredEventDto;
-import dto.hub.SensorRegisteredEventDto;
 import dto.sensor.*;
 import org.springframework.stereotype.Component;
 
 import ru.yandex.practicum.kafka.telemetry.event.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class TelemetryMapper {
 
-    public SensorData toAvro(SensorEventDto dto) {
-        Object event = switch (dto) {
-            case LightSensorEventDto e -> mapToLightSensorEvent(e);
-            case TemperatureSensorEventDto e -> mapToTemperatureSensorEvent(e);
-            case SmartSwitchEventDto e -> mapToSmartSwitchEvent(e);
-            case ClimateSensorEventDto e -> mapToClimateSensorEvent(e);
-            case MotionSensorEventDto e -> mapToMotionSensorEvent(e);
-            default -> throw new IllegalArgumentException("Unsupported SensorEventDto type: " + dto.getClass().getName());
+    public SensorEventAvro toAvro(SensorEventDto dto) {
+        Object payload = switch (dto) {
+            case LightSensorEventDto e -> mapToLightSensorAvro(e);
+            case TemperatureSensorEventDto e -> mapToTemperatureSensorAvro(e);
+            case SwitchSensorEventDto e -> mapToSwitchSensorAvro(e);
+            case ClimateSensorEventDto e -> mapToClimateSensorAvro(e);
+            case MotionSensorEventDto e -> mapToMotionSensorAvro(e);
+            case UnknownSensorEventDto e ->
+                    throw new IllegalArgumentException("Unsupported or unknown SensorEventDto type: " + e.getClass().getName());
+            default ->
+                    throw new IllegalArgumentException("Unsupported SensorEventDto type: " + dto.getClass().getName());
         };
-        return new SensorData(event);
-    }
 
-    public HubEvent toAvro(HubEventDto dto) {
-        Object event = switch (dto) {
-            case SensorRegisteredEventDto e -> mapToSensorRegisteredEvent(e);
-            case SensorDeregisteredEventDto e -> mapToSensorDeregisteredEvent(e);
-            case ScenarioAddedEventDto e -> mapToScenarioAddedEvent(e);
-            case ScenarioRemovedEventDto e -> mapToScenarioRemovedEvent(e);
-            default -> throw new IllegalArgumentException("Unsupported HubEventDto type: " + dto.getClass().getName());
-        };
-        return new HubEvent(event);
-    }
-
-    private LightSensorEvent mapToLightSensorEvent(LightSensorEventDto dto) {
-        return LightSensorEvent.newBuilder()
+        return SensorEventAvro.newBuilder()
                 .setId(dto.getId())
                 .setHubId(dto.getHubId())
                 .setTimestamp(dto.getTimestamp())
+                .setPayload(payload)
+                .build();
+    }
+
+    public HubEventAvro toAvro(HubEventDto dto) {
+        Object payload = switch (dto) {
+            case DeviceAddedEventDto e -> mapToDeviceAddedEventAvro(e);
+            case DeviceRemovedEventDto e -> mapToDeviceRemovedEventAvro(e);
+            case ScenarioAddedEventDto e -> mapToScenarioAddedEventAvro(e);
+            case ScenarioRemovedEventDto e -> mapToScenarioRemovedEventAvro(e);
+            case UnknownHubEventDto e -> throw new IllegalArgumentException("Unsupported HubEventDto");
+            default -> throw new IllegalArgumentException("Unsupported HubEventDto");
+        };
+
+        return HubEventAvro.newBuilder()
+                .setHubId(dto.getHubId())
+                .setTimestamp(dto.getTimestamp())
+                .setPayload(payload)
+                .build();
+    }
+
+    private LightSensorAvro mapToLightSensorAvro(LightSensorEventDto dto) {
+        return LightSensorAvro.newBuilder()
                 .setLinkQuality(dto.getLinkQuality())
                 .setLuminosity(dto.getLuminosity())
                 .build();
     }
 
-    private TemperatureSensorEvent mapToTemperatureSensorEvent(TemperatureSensorEventDto dto) {
-        return TemperatureSensorEvent.newBuilder()
+    private TemperatureSensorAvro mapToTemperatureSensorAvro(TemperatureSensorEventDto dto) {
+        return TemperatureSensorAvro.newBuilder()
                 .setId(dto.getId())
                 .setHubId(dto.getHubId())
                 .setTimestamp(dto.getTimestamp())
-                .setLinkQuality(dto.getLinkQuality())
-                .setTemperature(dto.getTemperature())
+                .setTemperatureC(dto.getTemperatureC())
+                .setTemperatureF(dto.getTemperatureF())
                 .build();
     }
 
-    private SmartSwitchEvent mapToSmartSwitchEvent(SmartSwitchEventDto dto) {
-        SmartSwitchState avroState = SmartSwitchState.valueOf(dto.getState().name());
-
-        return SmartSwitchEvent.newBuilder()
-                .setId(dto.getId())
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
-                .setLinkQuality(dto.getLinkQuality())
-                .setState(avroState)
+    private SwitchSensorAvro mapToSwitchSensorAvro(SwitchSensorEventDto dto) {
+        return SwitchSensorAvro.newBuilder()
+                .setState(dto.getState())
                 .build();
     }
 
-    private ClimateSensorEvent mapToClimateSensorEvent(ClimateSensorEventDto dto) {
-        return ClimateSensorEvent.newBuilder()
-                .setId(dto.getId())
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
-                .setLinkQuality(dto.getLinkQuality())
-                .setTemperature(dto.getTemperature())
+    private ClimateSensorAvro mapToClimateSensorAvro(ClimateSensorEventDto dto) {
+        return ClimateSensorAvro.newBuilder()
+                .setTemperatureC(dto.getTemperatureC())
                 .setHumidity(dto.getHumidity())
+                .setCo2Level(dto.getCo2Level())
                 .build();
     }
 
-    private MotionSensorEvent mapToMotionSensorEvent(MotionSensorEventDto dto) {
-        return MotionSensorEvent.newBuilder()
-                .setId(dto.getId())
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
+    private MotionSensorAvro mapToMotionSensorAvro(MotionSensorEventDto dto) {
+        return MotionSensorAvro.newBuilder()
                 .setLinkQuality(dto.getLinkQuality())
+                .setMotion(dto.getMotion())
+                .setVoltage(dto.getVoltage())
                 .build();
     }
 
-    private SensorRegisteredEvent mapToSensorRegisteredEvent(SensorRegisteredEventDto dto) {
-        SensorType avroSensorType = SensorType.valueOf(dto.getSensorType());
 
-        return SensorRegisteredEvent.newBuilder()
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
+    private DeviceAddedEventAvro mapToDeviceAddedEventAvro(DeviceAddedEventDto dto) {
+        return DeviceAddedEventAvro.newBuilder()
+                .setId(dto.getId())
+                .setType(DeviceTypeAvro.valueOf(dto.getType().name()))
+                .build();
+    }
+
+    private DeviceRemovedEventAvro mapToDeviceRemovedEventAvro(DeviceRemovedEventDto dto) {
+        return DeviceRemovedEventAvro.newBuilder()
+                .setId(dto.getId())
+                .build();
+    }
+
+    private ScenarioAddedEventAvro mapToScenarioAddedEventAvro(ScenarioAddedEventDto dto) {
+        List<ScenarioConditionAvro> avroConditions = dto.getConditions().stream()
+                .map(this::mapToScenarioConditionAvro)
+                .collect(Collectors.toList());
+
+        List<DeviceActionAvro> avroActions = dto.getActions().stream()
+                .map(this::mapToDeviceActionAvro)
+                .collect(Collectors.toList());
+
+        return ScenarioAddedEventAvro.newBuilder()
+                .setName(dto.getName())
+                .setConditions(avroConditions)
+                .setActions(avroActions)
+                .build();
+    }
+
+    private ScenarioRemovedEventAvro mapToScenarioRemovedEventAvro(ScenarioRemovedEventDto dto) {
+        return ScenarioRemovedEventAvro.newBuilder()
+                .setName(dto.getName())
+                .build();
+    }
+
+    private ScenarioConditionAvro mapToScenarioConditionAvro(ScenarioConditionDto dto) {
+        return ScenarioConditionAvro.newBuilder()
                 .setSensorId(dto.getSensorId())
-                .setSensorType(avroSensorType)
+                .setType(ConditionTypeAvro.valueOf(dto.getType().name()))
+                .setOperation(ConditionOperationAvro.valueOf(dto.getOperation().name()))
+                .setValue(dto.getValue())
                 .build();
     }
 
-    private SensorDeregisteredEvent mapToSensorDeregisteredEvent(SensorDeregisteredEventDto dto) {
-        return SensorDeregisteredEvent.newBuilder()
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
+    private DeviceActionAvro mapToDeviceActionAvro(DeviceActionDto dto) {
+        return DeviceActionAvro.newBuilder()
                 .setSensorId(dto.getSensorId())
-                .build();
-    }
-
-    private ScenarioAddedEvent mapToScenarioAddedEvent(ScenarioAddedEventDto dto) {
-        return ScenarioAddedEvent.newBuilder()
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
-                .setScenarioId(dto.getScenarioId())
-                .setScenarioName(dto.getScenarioName())
-                .build();
-    }
-
-    private ScenarioRemovedEvent mapToScenarioRemovedEvent(ScenarioRemovedEventDto dto) {
-        return ScenarioRemovedEvent.newBuilder()
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
-                .setScenarioId(dto.getScenarioId())
+                .setType(ActionTypeAvro.valueOf(dto.getType().name()))
+                .setValue(dto.getValue())
                 .build();
     }
 }

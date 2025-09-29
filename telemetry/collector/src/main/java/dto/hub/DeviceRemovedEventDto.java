@@ -8,12 +8,12 @@ import jakarta.validation.constraints.NotBlank;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScenarioRemovedEventDto extends HubEventDto {
+public class DeviceRemovedEventDto extends HubEventDto {
     @NotBlank
-    private String name;
+    private String id;
 
     @Override
     public HubEventType getEventType() {
-        return HubEventType.SCENARIO_REMOVED_EVENT;
+        return HubEventType.DEVICE_REMOVED_EVENT;
     }
 }

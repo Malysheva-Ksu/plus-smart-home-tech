@@ -1,47 +1,63 @@
 @namespace("ru.yandex.practicum.kafka.telemetry.event")
 protocol HubEventProtocol {
 
-    enum SensorType {
-        LIGHT, TEMPERATURE, SWITCH, CLIMATE, MOTION
+    enum DeviceTypeAvro {
+        MOTION_SENSOR, TEMPERATURE_SENSOR, LIGHT_SENSOR, CLIMATE_SENSOR, SWITCH_SENSOR
     }
 
-    record SensorRegisteredEvent {
-        string hubId;
+    enum ConditionTypeAvro {
+        MOTION, LUMINOSITY, SWITCH, TEMPERATURE, CO2LEVEL, HUMIDITY
+    }
+
+    enum ConditionOperationAvro {
+        EQUALS, GREATER_THAN, LOWER_THAN
+    }
+
+    enum ActionTypeAvro {
+        ACTIVATE, DEACTIVATE, INVERSE, SET_VALUE
+    }
+
+    record ScenarioConditionAvro {
+        string sensor_id;
+        ConditionTypeAvro type;
+        ConditionOperationAvro operation;
+        union { null, int, boolean } value = null;
+    }
+
+    record DeviceActionAvro {
+        string sensor_id;
+        ActionTypeAvro type;
+        union { null, int } value = null;
+    }
+
+    record DeviceAddedEventAvro {
+        string id;
+        DeviceTypeAvro type;
+    }
+
+    record DeviceRemovedEventAvro {
+        string id;
+    }
+
+    record ScenarioAddedEventAvro {
+        string name;
+        array<ScenarioConditionAvro> conditions;
+        array<DeviceActionAvro> actions;
+    }
+
+    record ScenarioRemovedEventAvro {
+        string name;
+    }
+
+    record HubEventAvro {
+        string hub_id;
         @logicalType("timestamp-millis")
         long timestamp;
-        string sensorId;
-        SensorType sensorType;
-    }
-
-    record SensorDeregisteredEvent {
-        string hubId;
-        @logicalType("timestamp-millis")
-        long timestamp;
-        string sensorId;
-    }
-
-    record ScenarioAddedEvent {
-        string hubId;
-        @logicalType("timestamp-millis")
-        long timestamp;
-        string scenarioId;
-        string scenarioName;
-    }
-
-    record ScenarioRemovedEvent {
-        string hubId;
-        @logicalType("timestamp-millis")
-        long timestamp;
-        string scenarioId;
-    }
-
-    record HubEvent {
         union {
-            SensorRegisteredEvent,
-            SensorDeregisteredEvent,
-            ScenarioAddedEvent,
-            ScenarioRemovedEvent
-        } event;
+            DeviceAddedEventAvro,
+            DeviceRemovedEventAvro,
+            ScenarioAddedEventAvro,
+            ScenarioRemovedEventAvro
+        } payload;
     }
-
 }

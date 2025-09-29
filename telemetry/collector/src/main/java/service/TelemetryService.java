@@ -5,8 +5,8 @@ import dto.base.SensorEventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.kafka.telemetry.event.HubEvent;
-import ru.yandex.practicum.kafka.telemetry.event.SensorData;
+import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
 @Service
 @RequiredArgsConstructor
@@ -20,13 +20,13 @@ public class TelemetryService {
 
     public void send(SensorEventDto dto) {
         String key = dto.getId();
-        SensorData avroEvent = mapper.toAvro(dto);
+        SensorEventAvro avroEvent = mapper.toAvro(dto);
         kafkaTemplate.send(SENSORS_TOPIC, key, avroEvent);
     }
 
     public void send(HubEventDto dto) {
         String key = dto.getHubId();
-        HubEvent avroEvent = mapper.toAvro(dto);
+        HubEventAvro avroEvent = mapper.toAvro(dto);
         kafkaTemplate.send(HUBS_TOPIC, key, avroEvent);
     }
 }
