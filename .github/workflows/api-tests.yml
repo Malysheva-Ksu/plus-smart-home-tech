@@ -59,7 +59,7 @@ jobs:
           cache: maven
 
       - name: Run API tests
-        run: mvn -B test
+        run: mvn -B verify
         env:
           VERBOSE_MODE: ${{ github.event.inputs.verbose_mode || 'false' }}
           PRINT_LOGS: ${{ github.event.inputs.print_logs || 'false' }}
