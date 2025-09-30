@@ -6,7 +6,6 @@ import dto.nested.*;
 import dto.event.*;
 import dto.hub.*;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.kafka.telemetry.event.*;
 
 import java.util.List;
@@ -22,8 +21,13 @@ public class TelemetryMapper {
             case SwitchSensorEventDto e -> mapToSwitchSensorAvro(e);
             case ClimateSensorEventDto e -> mapToClimateSensorAvro(e);
             case MotionSensorEventDto e -> mapToMotionSensorAvro(e);
-            case UnknownSensorEventDto e ->
-                    throw new IllegalArgumentException("Unsupported or unknown SensorEventDto type: " + e.getClass().getName());
+            case UnknownSensorEventDto e -> {
+                Object unknownEventType = e.getUnknownFields().get("eventType");
+                String errorMessage = (unknownEventType != null)
+                        ? "Received unknown eventType: '" + unknownEventType + "'"
+                        : "Field 'eventType' was missing in the request.";
+                throw new IllegalArgumentException("Unsupported SensorEventDto. " + errorMessage);
+            }
             default ->
                     throw new IllegalArgumentException("Unsupported SensorEventDto type: " + dto.getClass().getName());
         };
@@ -42,8 +46,14 @@ public class TelemetryMapper {
             case DeviceRemovedEventDto e -> mapToDeviceRemovedEventAvro(e);
             case ScenarioAddedEventDto e -> mapToScenarioAddedEventAvro(e);
             case ScenarioRemovedEventDto e -> mapToScenarioRemovedEventAvro(e);
-            case UnknownHubEventDto e -> throw new IllegalArgumentException("Unsupported HubEventDto");
-            default -> throw new IllegalArgumentException("Unsupported HubEventDto");
+            case UnknownHubEventDto e -> {
+                Object unknownEventType = e.getUnknownFields().get("eventType");
+                String errorMessage = (unknownEventType != null)
+                        ? "Received unknown eventType: '" + unknownEventType + "'"
+                        : "Field 'eventType' was missing in the request.";
+                throw new IllegalArgumentException("Unsupported HubEventDto. " + errorMessage);
+            }
+            default -> throw new IllegalArgumentException("Unsupported HubEventDto type: " + dto.getClass().getName());
         };
 
         return HubEventAvro.newBuilder()

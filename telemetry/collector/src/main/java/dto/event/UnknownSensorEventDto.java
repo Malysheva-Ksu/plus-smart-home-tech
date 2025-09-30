@@ -1,17 +1,24 @@
 package dto.event;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import dto.abstractDto.SensorEventDto;
 import dto.enums.SensorEventType;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import java.util.HashMap;
+import java.util.Map;
 
-@Data
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Getter
 public class UnknownSensorEventDto extends SensorEventDto {
+
+    private final Map<String, Object> unknownFields = new HashMap<>();
+
     @Override
     public SensorEventType getEventType() {
-        return SensorEventType.UNKNOWN_SENSOR;
+        return null;
+    }
+
+    @JsonAnySetter
+    public void setUnknownField(String name, Object value) {
+        unknownFields.put(name, value);
     }
 }

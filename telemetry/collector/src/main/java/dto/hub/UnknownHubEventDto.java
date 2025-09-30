@@ -1,17 +1,24 @@
 package dto.hub;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import dto.abstractDto.HubEventDto;
 import dto.enums.HubEventType;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import java.util.HashMap;
+import java.util.Map;
 
-@Data
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Getter
 public class UnknownHubEventDto extends HubEventDto {
+
+    private final Map<String, Object> unknownFields = new HashMap<>();
+
     @Override
     public HubEventType getEventType() {
-        return HubEventType.UNKNOWN_HUB;
+        return null;
+    }
+
+    @JsonAnySetter
+    public void setUnknownField(String name, Object value) {
+        unknownFields.put(name, value);
     }
 }
