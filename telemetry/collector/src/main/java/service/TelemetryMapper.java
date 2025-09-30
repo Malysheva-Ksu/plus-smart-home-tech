@@ -76,7 +76,7 @@ public class TelemetryMapper {
                 .setHubId(dto.getHubId())
                 .setTimestamp(dto.getTimestamp())
                 .setTemperatureC(dto.getTemperatureC())
-                .setTemperatureF(dto.getTemperatureF())
+                .setTemperatureF((int) (dto.getTemperatureC() * 1.8 + 32))
                 .build();
     }
 

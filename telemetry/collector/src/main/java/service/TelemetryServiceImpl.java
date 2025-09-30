@@ -58,26 +58,27 @@ public class TelemetryServiceImpl implements TelemetryService {
             rawEvent.put("eventType", "TEMPERATURE_SENSOR");
             return objectMapper.convertValue(rawEvent, TemperatureSensorEventDto.class);
         }
-        if (rawEvent.containsKey("lux")) {
+        if (rawEvent.containsKey("luminosity")) {
             rawEvent.put("eventType", "LIGHT_SENSOR");
             return objectMapper.convertValue(rawEvent, LightSensorEventDto.class);
         }
-        if (rawEvent.containsKey("detected")) {
+        if (rawEvent.containsKey("motion")) {
             rawEvent.put("eventType", "MOTION_SENSOR");
             return objectMapper.convertValue(rawEvent, MotionSensorEventDto.class);
         }
-        if (rawEvent.containsKey("open")) {
+        if (rawEvent.containsKey("state")) {
             rawEvent.put("eventType", "SWITCH_SENSOR");
             return objectMapper.convertValue(rawEvent, SwitchSensorEventDto.class);
         }
-        throw new IllegalArgumentException("Cannot infer sensor event type from payload: " + rawEvent);
+        throw new IllegalArgumentException("Cannot infer sensor event type" + rawEvent);
     }
+
 
     private HubEventDto inferHubEventDto(Map<String, Object> rawEvent) {
         if (rawEvent.containsKey("type") && rawEvent.containsKey("id")) {
             rawEvent.put("eventType", "DEVICE_ADDED");
             return objectMapper.convertValue(rawEvent, DeviceAddedEventDto.class);
         }
-        throw new IllegalArgumentException("Cannot infer hub event type from payload: " + rawEvent);
+        throw new IllegalArgumentException("Cannot infer hub event type" + rawEvent);
     }
 }
