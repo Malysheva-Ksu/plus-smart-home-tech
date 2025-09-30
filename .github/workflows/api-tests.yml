@@ -16,7 +16,7 @@ on:
 
   pull_request:
     branches:
-      - 1-collector-json
+      - main
 
 jobs:
   build:
