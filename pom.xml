@@ -23,6 +23,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <confluent.platform.version>7.4.3</confluent.platform.version>
 
         <avro.version>1.11.3</avro.version>
         <kafka-clients.version>3.6.1</kafka-clients.version>
@@ -125,8 +126,8 @@
                                 <goal>idl-protocol</goal>
                             </goals>
                             <configuration>
-                                <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-                                <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+                                <sourceDirectory>${project.basedir}/telemetry/serialization/src/main/avro/telemetry</sourceDirectory>
+                                <outputDirectory>${project.build.directory}/generated-sources/avro/</outputDirectory>
                             </configuration>
                         </execution>
                     </executions>
