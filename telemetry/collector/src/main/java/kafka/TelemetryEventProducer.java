@@ -1,8 +1,8 @@
 package kafka;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,14 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class TelemetryEventProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Autowired
+    public TelemetryEventProducer(KafkaTemplate<String, Object> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     @Value("${kafka.topics.sensors}")
     private String sensorTopic;
