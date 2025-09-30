@@ -58,8 +58,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run API tests
-        run: mvn -B verify
+      - name: Run ALL API tests (Unit + Integration)
+        run: mvn -B verify -Dsurefire.includes="**/*Test.java,**/*IT.java"
         env:
           VERBOSE_MODE: ${{ github.event.inputs.verbose_mode || 'false' }}
           PRINT_LOGS: ${{ github.event.inputs.print_logs || 'false' }}
