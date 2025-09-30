@@ -65,11 +65,12 @@ services:
 
   collector-service:
     container_name: collector-service
-    build: .
+    build:
+      context: ./telemetry/collector
     ports:
       - "8080:8080"
     depends_on:
       - kafka-init-topics
     environment:
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_KAFKA_PRODUCER_BOOTSTRAP-SERVERS=kafka:29092
       - SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL=http://schema-registry:8081
