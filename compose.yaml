@@ -75,7 +75,7 @@ services:
     depends_on:
       - kafka-init-topics
     environment:
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:29092
       - SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER=io.confluent.kafka.serializers.KafkaAvroSerializer
       - SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - SPRING_KAFKA_PRODUCER_KEY_SERIALIZER=org.apache.kafka.common.serialization.StringSerializer
