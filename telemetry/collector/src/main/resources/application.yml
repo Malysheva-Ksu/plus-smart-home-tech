@@ -4,9 +4,7 @@ server:
 spring:
   application:
     name: collector-service
-  kafka:
-    producer:
-      properties:
+
 kafka:
   topics:
     sensors: telemetry.sensors.v1
