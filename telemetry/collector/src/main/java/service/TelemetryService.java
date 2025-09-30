@@ -2,31 +2,15 @@ package service;
 
 import dto.abstractDto.HubEventDto;
 import dto.abstractDto.SensorEventDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
-@Service
-@RequiredArgsConstructor
-public class TelemetryService {
+import java.util.Map;
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final TelemetryMapper mapper;
+public interface TelemetryService {
+    void save(SensorEventDto event);
 
-    private static final String SENSORS_TOPIC = "telemetry.sensors.v1";
-    private static final String HUBS_TOPIC = "telemetry.hubs.v1";
+    void save(HubEventDto event);
 
-    public void send(SensorEventDto dto) {
-        String key = dto.getId();
-        SensorEventAvro avroEvent = mapper.toAvro(dto);
-        kafkaTemplate.send(SENSORS_TOPIC, key, avroEvent);
-    }
+    void processRawSensorEvent(Map<String, Object> rawEvent);
 
-    public void send(HubEventDto dto) {
-        String key = dto.getHubId();
-        HubEventAvro avroEvent = mapper.toAvro(dto);
-        kafkaTemplate.send(HUBS_TOPIC, key, avroEvent);
-    }
+    void processRawHubEvent(Map<String, Object> rawEvent);
 }
