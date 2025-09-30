@@ -72,5 +72,5 @@ services:
     depends_on:
       - kafka-init-topics
     environment:
-      - SPRING_KAFKA_PRODUCER_BOOTSTRAP-SERVERS=kafka:29092
+      - SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS=kafka:29092
       - SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL=http://schema-registry:8081
