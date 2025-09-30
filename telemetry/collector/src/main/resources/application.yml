@@ -13,7 +13,7 @@ spring:
       value-serializer: ${SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER:io.confluent.kafka.serializers.KafkaAvroSerializer}
 
       properties:
-        schema.registry.url: ${SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL:http://localhost:8081}
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
 
 kafka:
   topics:
