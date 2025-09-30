@@ -59,8 +59,10 @@ services:
       bash -c "
         echo 'Waiting for Kafka to be ready...' &&
         cub kafka-ready -b kafka:29092 1 30 &&
-        echo 'Kafka is ready!' &&
-        kafka-topics --create --topic telemetry --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092
+        echo 'Kafka is ready! Creating topics...' &&
+        kafka-topics --create --topic telemetry.sensors.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
+        kafka-topics --create --topic telemetry.hubs.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
+        echo 'Topics created!'
       "
     networks:
       - telemetry-net
@@ -75,7 +77,7 @@ services:
     depends_on:
       - kafka-init-topics
     environment:
-      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:29092
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER=io.confluent.kafka.serializers.KafkaAvroSerializer
       - SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - SPRING_KAFKA_PRODUCER_KEY_SERIALIZER=org.apache.kafka.common.serialization.StringSerializer

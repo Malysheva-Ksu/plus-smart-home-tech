@@ -5,10 +5,9 @@ WORKDIR /app
 COPY pom.xml .
 
 COPY telemetry/ ./telemetry/
-COPY infra/ ./infra/
-COPY commerce/ ./commerce/
 
-RUN mvn -pl telemetry/collector -am clean package -DskipTests
+RUN mvn -f telemetry/pom.xml clean package -DskipTests
+
 
 FROM eclipse-temurin:21-jre
 
