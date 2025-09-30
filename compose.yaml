@@ -32,12 +32,18 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
   kafka-init-topics:
     image: confluentinc/confluent-local:7.4.3
     container_name: kafka-init-topics
     depends_on:
-      - schema-registry
+      schema-registry:
+        condition: service_healthy
     command: >
       bash -c "
         echo 'Waiting for Kafka to be ready...' &&
@@ -56,14 +62,14 @@ services:
                      --bootstrap-server kafka:29092 &&
         echo 'Topics created successfully.'
       "
-      
-      collector-service:
-        container_name: collector-service
-        build: . 
-        ports:
-          - "8080:8080"
-        depends_on:
-          - kafka-init-topics
-        environment:
-          - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-          - SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+
+  collector-service:
+    container_name: collector-service
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka-init-topics
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+      - SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL=http://localhost:8081
