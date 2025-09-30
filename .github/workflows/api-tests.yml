@@ -13,7 +13,10 @@ on:
         required: false
         default: false
         type: boolean
+
   pull_request:
+    branches:
+      - 1-collector-json
 
 jobs:
   build:
@@ -44,11 +47,11 @@ jobs:
         ports:
           - 8081:8081
         environment:
-
           SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
           SCHEMA_REGISTRY_HOST_NAME: schema-registry
           SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
     uses: yandex-praktikum/plus-smart-home-tech/.github/workflows/api-tests.yml@ci
     with:
-      verbose_mode: ${{ inputs.verbose_mode }}
-      print_logs: ${{ inputs.print_logs }}
+      verbose_mode: ${{ github.event.inputs.verbose_mode || 'false' }}
+      print_logs: ${{ github.event.inputs.print_logs || 'false' }}
