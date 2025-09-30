@@ -13,25 +13,26 @@ on:
         required: false
         default: false
         type: boolean
-
   pull_request:
     branches:
       - main
+
 jobs:
-  build:
+  build-and-test:
+    runs-on: ubuntu-latest
+
     services:
       kafka:
         image: confluentinc/cp-kafka:7.4.3
-        hostname: kafka
         ports: ['9092:9092']
         environment:
           KAFKA_NODE_ID: 1
           KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-          KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+          KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT_HOST://localhost:9092'
           KAFKA_PROCESS_ROLES: 'broker,controller'
           KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
-          KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
-          KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+          KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+          KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT_HOST'
           KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
           CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -40,14 +41,25 @@ jobs:
           KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       schema-registry:
         image: confluentinc/cp-schema-registry:7.4.3
-        hostname: schema-registry
         ports: ['8081:8081']
         environment:
-          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
+          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'localhost:9092'
           SCHEMA_REGISTRY_HOST_NAME: schema-registry
           SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
-    uses: yandex-praktikum/plus-smart-home-tech/.github/workflows/api-tests.yml@ci
-    with:
-      verbose_mode: ${{ github.event.inputs.verbose_mode || 'false' }}
-      print_logs: ${{ github.event.inputs.print_logs || 'false' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run API tests
+        run: mvn -B test
+        env:
+          VERBOSE_MODE: ${{ github.event.inputs.verbose_mode || 'false' }}
+          PRINT_LOGS: ${{ github.event.inputs.print_logs || 'false' }}
