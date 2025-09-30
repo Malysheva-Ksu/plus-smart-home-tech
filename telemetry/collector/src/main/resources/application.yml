@@ -5,12 +5,14 @@ spring:
   application:
     name: collector-service
   kafka:
+
+    bootstrap-servers: localhost:9092
     producer:
-      bootstrap-servers: localhost:9092
-
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-
       properties:
+
         schema.registry.url: http://localhost:8081
+
+kafka:
+  topics:
+    sensors: telemetry.sensors.v1
+    hubs: telemetry.hubs.v1
