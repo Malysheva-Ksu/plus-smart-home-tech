@@ -15,7 +15,4 @@ WORKDIR /app
 
 COPY --from=build /app/telemetry/collector/target/*.jar app.jar
 
-ENTRYPOINT ["java", \
-     "-Dspring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS}", \
-     "-Dspring.kafka.properties.schema.registry.url=${KAFKA_SCHEMA_REGISTRY_URL}", \
-     "-jar", "app.jar"]
+ENTRYPOINT sh -c 'java -Dspring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS} -Dspring.kafka.properties.schema.registry.url=${KAFKA_SCHEMA_REGISTRY_URL} -jar app.jar'
