@@ -17,9 +17,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     healthcheck:
-      test: ["CMD", "cub", "kafka-ready", "-b", "kafka:29092", "1", "20"]
+      test: ["CMD", "cub", "kafka-ready", "-b", "localhost:29092", "1", "60"] # Изменено на localhost:29092 и увеличен таймаут
       interval: 10s
-      timeout: 30s
+      timeout: 60s
       retries: 5
 
   schema-registry:
