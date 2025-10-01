@@ -41,11 +41,12 @@ services:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka-init-topics
     depends_on:
-      kafka:
-        condition: service_healthy
+      - kafka
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
     command: >
       bash -c "
-        echo 'Kafka is healthy! Creating topics...' &&
+        /wait-for-it.sh kafka 29092 -- echo 'Kafka is ready!' &&
         kafka-topics --create --topic telemetry.sensors.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
         kafka-topics --create --topic telemetry.hubs.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
         echo 'Topics created.'
@@ -61,13 +62,19 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      kafka:
-        condition: service_healthy
-      schema-registry:
-        condition: service_started
+      - kafka
+      - schema-registry
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    command: >
+      sh -c "/wait-for-it.sh schema-registry 8081 -- 
+             java 
+             -Dspring.kafka.bootstrap-servers=$${KAFKA_BOOTSTRAP_SERVERS} 
+             -Dspring.kafka.properties.schema.registry.url=$${KAFKA_SCHEMA_REGISTRY_URL} 
+             -jar app.jar"
     networks:
       - telemetry-net
 
