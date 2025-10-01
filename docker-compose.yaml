@@ -19,6 +19,11 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+    healthcheck:
+      test: ["CMD", "cub", "kafka-ready", "-b", "kafka:29092", "1", "20"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - telemetry-net
 
@@ -26,10 +31,10 @@ services:
     image: confluentinc/cp-schema-registry:7.3.0
     container_name: schema-registry
     hostname: schema-registry
-    ports:
-      - "8081:8081"
+    ports: ["8081:8081"]
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
@@ -40,12 +45,11 @@ services:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka-init-topics
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     command: >
       bash -c "
-        echo 'Waiting for Kafka...' &&
-        cub kafka-ready -b kafka:29092 1 30 &&
-        echo 'Kafka is ready!' &&
+        echo 'Kafka is healthy! Creating topics...' &&
         kafka-topics --create --topic telemetry.sensors.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
         kafka-topics --create --topic telemetry.hubs.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
         echo 'Topics created.'
@@ -61,8 +65,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - kafka
-      - schema-registry
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_started
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
