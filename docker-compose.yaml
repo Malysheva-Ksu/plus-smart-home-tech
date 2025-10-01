@@ -20,6 +20,8 @@ services:
     depends_on:
       - zookeeper
     environment:
+      KAFKA_PROCESS_ROLES: 'broker'
+
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
@@ -48,29 +50,11 @@ services:
     networks:
       - telemetry-net
 
-  schema-registry-waiter:
-    image: alpine:latest
-    container_name: schema-registry-waiter
-    depends_on:
-      - schema-registry
-    command: >
-      sh -c "
-        echo 'Waiting for Schema Registry to be ready...'
-        apk add --no-cache curl
-        until curl -s -f http://schema-registry:8081; do
-          echo -n '.'
-          sleep 5
-        done
-        echo 'Schema Registry is up and running!'
-      "
-    networks:
-      - telemetry-net
-
   kafka-init-topics:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka-init-topics
     depends_on:
-      - schema-registry-waiter
+      - schema-registry
     command: >
       bash -c "
         echo 'Waiting for Kafka to be ready...' &&
