@@ -4,16 +4,11 @@ server:
 spring:
   application:
     name: collector-service
-
   kafka:
     producer:
-      bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
 
-      key-serializer: ${SPRING_KAFKA_PRODUCER_KEY_SERIALIZER:org.apache.kafka.common.serialization.StringSerializer}
-      value-serializer: ${SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER:io.confluent.kafka.serializers.KafkaAvroSerializer}
-
-      properties:
-        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
 
 kafka:
   topics:
