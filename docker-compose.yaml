@@ -1,29 +1,32 @@
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - telemetry-net
+
   kafka:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka
     hostname: kafka
     ports:
       - "9092:9092"
+    depends_on:
+      - zookeeper
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092'
-      KAFKA_LISTENERS: 'PLAINTEXT_INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093,PLAINTEXT://0.0.0.0:9092'
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
-      CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-    healthcheck:
-      test: ["CMD", "cub", "kafka-ready", "-b", "kafka:29092", "1", "20"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
     networks:
       - telemetry-net
 
@@ -31,10 +34,10 @@ services:
     image: confluentinc/cp-schema-registry:7.3.0
     container_name: schema-registry
     hostname: schema-registry
-    ports: ["8081:8081"]
+    ports:
+      - "8081:8081"
     depends_on:
-      kafka:
-        condition: service_healthy
+      - kafka
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
@@ -45,11 +48,12 @@ services:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka-init-topics
     depends_on:
-      kafka:
-        condition: service_healthy
+      - kafka
     command: >
       bash -c "
-        echo 'Kafka is healthy! Creating topics...' &&
+        echo 'Waiting for Kafka to be ready...' &&
+        cub kafka-ready -b kafka:29092 1 60 &&
+        echo 'Kafka is ready!' &&
         kafka-topics --create --topic telemetry.sensors.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
         kafka-topics --create --topic telemetry.hubs.v1 --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 &&
         echo 'Topics created.'
@@ -65,10 +69,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      kafka:
-        condition: service_healthy
-      schema-registry:
-        condition: service_started
+      - kafka
+      - schema-registry
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
