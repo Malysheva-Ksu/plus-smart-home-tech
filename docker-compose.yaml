@@ -54,7 +54,8 @@ services:
       - telemetry-net
 
   collector-service:
-    build: .
+    context: .
+    dockerfile: telemetry/Dockerfile
     container_name: collector-service
     ports:
       - "8080:8080"
@@ -62,7 +63,7 @@ services:
       - kafka
       - schema-registry
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
     networks:
       - telemetry-net
