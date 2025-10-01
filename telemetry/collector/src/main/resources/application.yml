@@ -5,10 +5,10 @@ spring:
   application:
     name: collector-service
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    bootstrap-servers: kafka:29092
 
     properties:
-      schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
+      schema.registry.url: http://schema-registry:8081
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
