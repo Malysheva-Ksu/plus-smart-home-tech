@@ -17,7 +17,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     healthcheck:
-      test: ["CMD", "cub", "kafka-ready", "-b", "localhost:29092", "1", "60"] # Изменено на localhost:29092 и увеличен таймаут
+      test: ["CMD", "cub", "kafka-ready", "-b", "localhost:29092", "1", "60"]
       interval: 10s
       timeout: 60s
       retries: 5
@@ -41,7 +41,8 @@ services:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka-init-topics
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     volumes:
       - ./wait-for-it.sh:/wait-for-it.sh
     command: >
