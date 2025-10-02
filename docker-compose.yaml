@@ -63,8 +63,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - kafka
-      - schema-registry
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
     volumes:
       - ./wait-for-it.sh:/wait-for-it.sh
     environment:
