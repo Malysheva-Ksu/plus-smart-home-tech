@@ -30,23 +30,19 @@ public class EventTypeResolver {
     }
 
     public HubEventDto resolveHubEvent(Map<String, Object> rawEvent) {
-        if (rawEvent.containsKey("name") && rawEvent.containsKey("conditions")) {
-            rawEvent.put("eventType", "SCENARIO_ADDED");
-            return objectMapper.convertValue(rawEvent, ScenarioAddedEventDto.class);
-        }
-        else if (rawEvent.containsKey("name")) {
-            rawEvent.put("eventType", "SCENARIO_REMOVED");
-            return objectMapper.convertValue(rawEvent, ScenarioRemovedEventDto.class);
-        }
-        else if (rawEvent.containsKey("id") && rawEvent.containsKey("type")) {
-            rawEvent.put("eventType", "DEVICE_ADDED");
-            return objectMapper.convertValue(rawEvent, DeviceAddedEventDto.class);
-        }
-        else if (rawEvent.containsKey("id")) {
-            rawEvent.put("eventType", "DEVICE_REMOVED");
-            return objectMapper.convertValue(rawEvent, DeviceRemovedEventDto.class);
-        }
+        String eventType = (String) rawEvent.get("type");
 
-        throw new IllegalArgumentException("Cannot infer hub event type: " + rawEvent);
+        switch (eventType) {
+            case "SCENARIO_ADDED":
+                return objectMapper.convertValue(rawEvent, ScenarioAddedEventDto.class);
+            case "SCENARIO_REMOVED":
+                return objectMapper.convertValue(rawEvent, ScenarioRemovedEventDto.class);
+            case "DEVICE_ADDED":
+                return objectMapper.convertValue(rawEvent, DeviceAddedEventDto.class);
+            case "DEVICE_REMOVED":
+                return objectMapper.convertValue(rawEvent, DeviceRemovedEventDto.class);
+            default:
+                throw new IllegalArgumentException("Unsupported event type: " + eventType);
+        }
     }
 }
