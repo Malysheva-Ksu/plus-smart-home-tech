@@ -19,6 +19,8 @@
         <module>telemetry</module>
         <module>infra</module>
         <module>commerce</module>
+        <module>consumer</module>
+        <module>producer</module>
     </modules>
 
     <properties>
