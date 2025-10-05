@@ -5,30 +5,11 @@ spring:
   application:
     name: collector-service
 
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
-
-    producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-
-      retries: 3
-      acks: all
-      compression-type: lz4
-
-    properties:
-      schema.registry.url: ${SCHEMA_REGISTRY_URL:http://schema-registry:8081}
-
-      value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-
-      max.block.ms: 30000
-      max.in.flight.requests.per.connection: 1
-
-      auto.register.schemas: true
-      use.latest.version: true
-
 kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  producer:
+    client-id: smart-home-collector-service
+    acks: all
   topics:
     sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
     hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
@@ -36,19 +17,6 @@ kafka:
 
 logging:
   level:
-    org.springframework.kafka: DEBUG
-    org.apache.kafka: DEBUG
-    io.confluent.kafka: DEBUG
     ru.yandex.practicum: DEBUG
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include:
-          - health
-          - info
-          - metrics
-  health:
-    kafka:
-      enabled: true
+    kafkaConfig: DEBUG
+    org.apache.kafka: INFO
