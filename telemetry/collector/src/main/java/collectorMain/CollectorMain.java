@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
         R2dbcAutoConfiguration.class,
         R2dbcDataAutoConfiguration.class
 })
-@ComponentScan(basePackages = {"collectorMain", "controller", "service", "dto", "kafka"})
+@ComponentScan(basePackages = {"collectorMain", "controller", "service", "dto", "kafkaConfig"})
 public class CollectorMain {
 
     public static void main(String[] args) {
