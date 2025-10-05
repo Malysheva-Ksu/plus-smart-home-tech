@@ -72,9 +72,6 @@ public class TelemetryMapper {
 
     private TemperatureSensorAvro mapToTemperatureSensorAvro(TemperatureSensorEventDto dto) {
         return TemperatureSensorAvro.newBuilder()
-                .setId(dto.getId())
-                .setHubId(dto.getHubId())
-                .setTimestamp(dto.getTimestamp())
                 .setTemperatureC(dto.getTemperatureC())
                 .setTemperatureF((int) (dto.getTemperatureC() * 1.8 + 32))
                 .build();

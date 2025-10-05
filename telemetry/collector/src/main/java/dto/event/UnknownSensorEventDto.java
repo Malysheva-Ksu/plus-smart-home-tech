@@ -14,7 +14,7 @@ public class UnknownSensorEventDto extends SensorEventDto {
 
     @Override
     public SensorEventType getEventType() {
-        return null;
+        return SensorEventType.UNKNOWN_SENSOR;
     }
 
     @JsonAnySetter

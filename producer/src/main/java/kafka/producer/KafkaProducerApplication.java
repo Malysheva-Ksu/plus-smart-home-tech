@@ -23,48 +23,66 @@ public class KafkaProducerApplication {
     private static final String SENSORS_TOPIC = "telemetry.sensors.v1";
     private static final String HUBS_TOPIC = "telemetry.hubs.v1";
 
-    public static void main(String[] args) throws InterruptedException {
+    private static final SpecificDatumWriter<SensorEventAvro> SENSOR_EVENT_WRITER =
+            new SpecificDatumWriter<>(SensorEventAvro.class);
+    private static final SpecificDatumWriter<HubEventAvro> HUB_EVENT_WRITER =
+            new SpecificDatumWriter<>(HubEventAvro.class);
+
+    public static void main(String[] args) {
         Properties config = getProducerProperties();
 
         try (KafkaProducer<String, byte[]> producer = new KafkaProducer<>(config)) {
             System.out.println("Producer запущен.");
 
             for (int i = 0; i < 3; i++) {
-                String sensorId = "sensor-" + i;
-                SensorEventAvro sensorEvent = createTemperatureEvent(sensorId);
-                byte[] sensorEventBytes = serializeAvro(sensorEvent);
-                ProducerRecord<String, byte[]> sensorRecord = new ProducerRecord<>(SENSORS_TOPIC, sensorId, sensorEventBytes);
-                producer.send(sensorRecord, (metadata, e) -> {
-                    if (e == null) {
-                        System.out.printf("Событие сенсора отправлено в топик %s\n", metadata.topic());
-                    } else {
-                        e.printStackTrace();
-                    }
-                });
-                Thread.sleep(500);
+                try {
+                    String sensorId = "sensor-" + i;
+                    SensorEventAvro sensorEvent = createTemperatureEvent(sensorId);
+                    byte[] sensorEventBytes = serializeAvro(sensorEvent);
+                    ProducerRecord<String, byte[]> sensorRecord = new ProducerRecord<>(SENSORS_TOPIC, sensorId, sensorEventBytes);
+                    producer.send(sensorRecord, (metadata, e) -> {
+                        if (e == null) {
+                            System.out.printf("Событие сенсора отправлено в топик %s\n", metadata.topic());
+                        } else {
+                            e.printStackTrace();
+                        }
+                    });
+                    Thread.sleep(500);
 
-                String hubId = "hub-" + i;
-                HubEventAvro hubEvent = createDeviceAddedEvent(hubId);
-                byte[] hubEventBytes = serializeAvro(hubEvent);
-                ProducerRecord<String, byte[]> hubRecord = new ProducerRecord<>(HUBS_TOPIC, hubId, hubEventBytes);
-                producer.send(hubRecord, (metadata, e) -> {
-                    if (e == null) {
-                        System.out.printf("Событие хаба отправлено в топик %s\n", metadata.topic());
-                    } else {
-                        e.printStackTrace();
-                    }
-                });
-                Thread.sleep(500);
+                    String hubId = "hub-" + i;
+                    HubEventAvro hubEvent = createDeviceAddedEvent(hubId);
+                    byte[] hubEventBytes = serializeAvro(hubEvent);
+                    ProducerRecord<String, byte[]> hubRecord = new ProducerRecord<>(HUBS_TOPIC, hubId, hubEventBytes);
+                    producer.send(hubRecord, (metadata, e) -> {
+                        if (e == null) {
+                            System.out.printf("Событие хаба отправлено в топик %s\n", metadata.topic());
+                        } else {
+                            e.printStackTrace();
+                        }
+                    });
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    System.err.println("Producer был прерван. Завершение работы...");
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
             producer.flush();
         }
     }
 
-    private static <T extends SpecificRecordBase> byte[] serializeAvro(T record) {
-        SpecificDatumWriter<T> datumWriter = new SpecificDatumWriter<>(record.getSchema());
+    private static byte[] serializeAvro(SensorEventAvro record) {
+        return serializeWithWriter(record, SENSOR_EVENT_WRITER);
+    }
+
+    private static byte[] serializeAvro(HubEventAvro record) {
+        return serializeWithWriter(record, HUB_EVENT_WRITER);
+    }
+
+    private static <T extends SpecificRecordBase> byte[] serializeWithWriter(T record, SpecificDatumWriter<T> writer) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
-            datumWriter.write(record, encoder);
+            writer.write(record, encoder);
             encoder.flush();
             return outputStream.toByteArray();
         } catch (IOException e) {
@@ -84,9 +102,16 @@ public class KafkaProducerApplication {
 
     private static SensorEventAvro createTemperatureEvent(String sensorId) {
         TemperatureSensorAvro tempSensor = TemperatureSensorAvro.newBuilder()
-                .setId(sensorId).setHubId("hub-1").setTimestamp(Instant.now()).setTemperatureC(25).setTemperatureF(77).build();
+                .setTemperatureC(25)
+                .setTemperatureF(77)
+                .build();
+
         return SensorEventAvro.newBuilder()
-                .setId(sensorId).setHubId("hub-1").setTimestamp(Instant.now()).setPayload(tempSensor).build();
+                .setId(sensorId)
+                .setHubId("hub-1")
+                .setTimestamp(Instant.now())
+                .setPayload(tempSensor)
+                .build();
     }
 
     private static HubEventAvro createDeviceAddedEvent(String hubId) {

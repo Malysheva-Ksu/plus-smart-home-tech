@@ -16,7 +16,7 @@ public class ClimateSensorEventHandler implements RawSensorEventHandler {
 
     @Override
     public boolean supports(Map<String, Object> rawEvent) {
-        return rawEvent.containsKey("temperature") && rawEvent.containsKey("humidity");
+        return rawEvent.containsKey("temperatureC") && rawEvent.containsKey("humidity");
     }
 
     @Override

@@ -21,6 +21,11 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class KafkaEventProducer {
 
+    private static final SpecificDatumWriter<SensorEventAvro> SENSOR_EVENT_WRITER =
+            new SpecificDatumWriter<>(SensorEventAvro.class);
+    private static final SpecificDatumWriter<HubEventAvro> HUB_EVENT_WRITER =
+            new SpecificDatumWriter<>(HubEventAvro.class);
+
     private final KafkaProducer<String, byte[]> kafkaProducer;
 
     @Value("${kafka.topics.sensors}")
@@ -30,7 +35,7 @@ public class KafkaEventProducer {
     private String hubsTopic;
 
     public void send(SensorEventAvro event) {
-        byte[] eventBytes = serializeAvro(event);
+        byte[] eventBytes = serializeAvro(event, SENSOR_EVENT_WRITER);
         ProducerRecord<String, byte[]> record = new ProducerRecord<>(sensorsTopic, event.getId().toString(), eventBytes);
 
         kafkaProducer.send(record, (metadata, exception) -> {
@@ -44,7 +49,7 @@ public class KafkaEventProducer {
     }
 
     public void send(HubEventAvro event) {
-        byte[] eventBytes = serializeAvro(event);
+        byte[] eventBytes = serializeAvro(event, HUB_EVENT_WRITER);
         ProducerRecord<String, byte[]> record = new ProducerRecord<>(hubsTopic, event.getHubId().toString(), eventBytes);
 
         kafkaProducer.send(record, (metadata, exception) -> {
@@ -57,11 +62,10 @@ public class KafkaEventProducer {
         });
     }
 
-    private <T extends SpecificRecordBase> byte[] serializeAvro(T record) {
-        SpecificDatumWriter<T> datumWriter = new SpecificDatumWriter<>(record.getSchema());
+    private <T extends SpecificRecordBase> byte[] serializeAvro(T record, SpecificDatumWriter<T> writer) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
-            datumWriter.write(record, encoder);
+            writer.write(record, encoder);
             encoder.flush();
             return outputStream.toByteArray();
         } catch (IOException e) {

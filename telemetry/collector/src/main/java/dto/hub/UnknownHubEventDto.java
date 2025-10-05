@@ -14,7 +14,7 @@ public class UnknownHubEventDto extends HubEventDto {
 
     @Override
     public HubEventType getEventType() {
-        return null;
+        return HubEventType.UNKNOWN_HUB;
     }
 
     @JsonAnySetter
