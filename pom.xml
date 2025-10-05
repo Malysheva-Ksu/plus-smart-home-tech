@@ -37,6 +37,8 @@
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version>
 
+        <avro-schemas.version>1.0-SNAPSHOT</avro-schemas.version>
+
         <protobuf-plugin.version>0.6.1</protobuf-plugin.version>
     </properties>
 
@@ -102,6 +104,12 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.yandex.practicum</groupId>
+                <artifactId>avro-schemas</artifactId>
+                <version>${avro-schemas.version}</version>
             </dependency>
 
             <!--    / GRPC dependencies management        -->
