@@ -3,6 +3,7 @@ package service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dto.abstractDto.HubEventDto;
 import dto.abstractDto.SensorEventDto;
+import dto.enums.DeviceTypeDto;
 import dto.hub.DeviceAddedEventDto;
 import dto.hub.DeviceRemovedEventDto;
 import dto.hub.ScenarioAddedEventDto;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import service.resolver.RawSensorEventHandler;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,17 +32,28 @@ public class EventTypeResolver {
     }
 
     public HubEventDto resolveHubEvent(Map<String, Object> rawEvent) {
-        String eventType = (String) rawEvent.get("type");
+        Map<String, Object> modifiedEvent = new HashMap<>(rawEvent);
+
+        modifiedEvent.put("eventType", modifiedEvent.get("type"));
+
+        String eventType = (String) modifiedEvent.get("eventType");
+
+        if ("DEVICE_ADDED".equals(eventType)) {
+            Object deviceTypeValue = modifiedEvent.get("deviceType");
+            if (deviceTypeValue instanceof String) {
+                modifiedEvent.put("type", DeviceTypeDto.valueOf((String) deviceTypeValue));
+            }
+
+            return objectMapper.convertValue(modifiedEvent, DeviceAddedEventDto.class);
+        }
 
         switch (eventType) {
             case "SCENARIO_ADDED":
-                return objectMapper.convertValue(rawEvent, ScenarioAddedEventDto.class);
+                return objectMapper.convertValue(modifiedEvent, ScenarioAddedEventDto.class);
             case "SCENARIO_REMOVED":
-                return objectMapper.convertValue(rawEvent, ScenarioRemovedEventDto.class);
-            case "DEVICE_ADDED":
-                return objectMapper.convertValue(rawEvent, DeviceAddedEventDto.class);
+                return objectMapper.convertValue(modifiedEvent, ScenarioRemovedEventDto.class);
             case "DEVICE_REMOVED":
-                return objectMapper.convertValue(rawEvent, DeviceRemovedEventDto.class);
+                return objectMapper.convertValue(modifiedEvent, DeviceRemovedEventDto.class);
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + eventType);
         }

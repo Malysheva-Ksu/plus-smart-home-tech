@@ -18,7 +18,7 @@ import java.time.Instant;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
+        property = "eventType",
         defaultImpl = UnknownHubEventDto.class
 )
 @JsonSubTypes({

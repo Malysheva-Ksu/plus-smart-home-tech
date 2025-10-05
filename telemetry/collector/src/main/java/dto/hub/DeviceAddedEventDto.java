@@ -16,6 +16,7 @@ public class DeviceAddedEventDto extends HubEventDto {
     private String id;
 
     @NotNull
+    @JsonProperty("deviceType")
     private DeviceTypeDto type;
 
     @Override
