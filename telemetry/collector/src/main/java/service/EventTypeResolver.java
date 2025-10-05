@@ -1,9 +1,12 @@
 package service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dto.abstractDto.HubEventDto;
 import dto.abstractDto.SensorEventDto;
 import dto.hub.DeviceAddedEventDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dto.hub.DeviceRemovedEventDto;
+import dto.hub.ScenarioAddedEventDto;
+import dto.hub.ScenarioRemovedEventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import service.resolver.RawSensorEventHandler;
@@ -27,10 +30,23 @@ public class EventTypeResolver {
     }
 
     public HubEventDto resolveHubEvent(Map<String, Object> rawEvent) {
-        if (rawEvent.containsKey("type") && rawEvent.containsKey("id")) {
+        if (rawEvent.containsKey("name") && rawEvent.containsKey("conditions")) {
+            rawEvent.put("eventType", "SCENARIO_ADDED");
+            return objectMapper.convertValue(rawEvent, ScenarioAddedEventDto.class);
+        }
+        else if (rawEvent.containsKey("name")) {
+            rawEvent.put("eventType", "SCENARIO_REMOVED");
+            return objectMapper.convertValue(rawEvent, ScenarioRemovedEventDto.class);
+        }
+        else if (rawEvent.containsKey("id") && rawEvent.containsKey("type")) {
             rawEvent.put("eventType", "DEVICE_ADDED");
             return objectMapper.convertValue(rawEvent, DeviceAddedEventDto.class);
         }
+        else if (rawEvent.containsKey("id")) {
+            rawEvent.put("eventType", "DEVICE_REMOVED");
+            return objectMapper.convertValue(rawEvent, DeviceRemovedEventDto.class);
+        }
+
         throw new IllegalArgumentException("Cannot infer hub event type: " + rawEvent);
     }
 }
