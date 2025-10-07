@@ -1,5 +1,6 @@
 package kafka.consumer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
+@Slf4j
 public class KafkaConsumerApplication {
 
     private static final String SERVER = "localhost:9092";
@@ -31,12 +33,12 @@ public class KafkaConsumerApplication {
 
         try (KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(config)) {
             consumer.subscribe(Arrays.asList(SENSORS_TOPIC, HUBS_TOPIC));
-            System.out.println("Consumer запущен. Ожидание сообщений...");
+            log.info("Consumer запущен. Ожидание сообщений...");
 
             while (true) {
                 ConsumerRecords<String, byte[]> records = consumer.poll(Duration.ofMillis(1000));
                 records.forEach(record -> {
-                    System.out.printf("Получено сообщение из топика: %s, key=%s\n", record.topic(), record.key());
+                    log.info("Получено сообщение из топика: %s, key=%s\n", record.topic(), record.key());
                     byte[] data = record.value();
 
                     if (record.topic().equals(SENSORS_TOPIC)) {
@@ -44,14 +46,14 @@ public class KafkaConsumerApplication {
                             SensorEventAvro event = deserializeAvro(data, sensorReader);
                             handleSensorEvent(event);
                         } catch (IOException e) {
-                            System.err.println("Не удалось десериализовать SensorEventAvro: " + e.getMessage());
+                            log.error("Не удалось десериализовать SensorEventAvro: {}", e.getMessage());
                         }
                     } else if (record.topic().equals(HUBS_TOPIC)) {
                         try {
                             HubEventAvro event = deserializeAvro(data, hubReader);
                             handleHubEvent(event);
                         } catch (IOException e) {
-                            System.err.println("Не удалось десериализовать HubEventAvro: " + e.getMessage());
+                            log.error("Не удалось десериализовать HubEventAvro: {}", e.getMessage());
                         }
                     }
                 });
@@ -67,18 +69,18 @@ public class KafkaConsumerApplication {
     private static void handleSensorEvent(SensorEventAvro event) {
         Object payload = event.getPayload();
         if (payload instanceof TemperatureSensorAvro) {
-            System.out.printf("\t[Сенсор] ID: %s, Температура: %d°C\n\n", event.getId(), ((TemperatureSensorAvro) payload).getTemperatureC());
+            log.info("\t[Сенсор] ID: %s, Температура: %d°C\n\n", event.getId(), ((TemperatureSensorAvro) payload).getTemperatureC());
         } else {
-            System.out.printf("\t[Сенсор] ID: %s, Неизвестный тип payload: %s\n\n", event.getId(), payload.getClass().getSimpleName());
+            log.info("\t[Сенсор] ID: %s, Неизвестный тип payload: %s\n\n", event.getId(), payload.getClass().getSimpleName());
         }
     }
 
     private static void handleHubEvent(HubEventAvro event) {
         Object payload = event.getPayload();
         if (payload instanceof DeviceAddedEventAvro) {
-            System.out.printf("\t[Хаб] ID: %s, Добавлено устройство типа: %s\n\n", event.getHubId(), ((DeviceAddedEventAvro) payload).getType());
+            log.info("\t[Хаб] ID: %s, Добавлено устройство типа: %s\n\n", event.getHubId(), ((DeviceAddedEventAvro) payload).getType());
         } else {
-            System.out.printf("\t[Хаб] ID: %s, Неизвестный тип payload: %s\n\n", event.getHubId(), payload.getClass().getSimpleName());
+            log.info("\t[Хаб] ID: %s, Неизвестный тип payload: %s\n\n", event.getHubId(), payload.getClass().getSimpleName());
         }
     }
 

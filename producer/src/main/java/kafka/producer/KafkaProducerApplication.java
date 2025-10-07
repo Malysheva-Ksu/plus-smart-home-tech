@@ -1,5 +1,6 @@
 package kafka.producer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
@@ -17,6 +18,7 @@ import java.time.Instant;
 import java.util.Properties;
 import java.util.UUID;
 
+@Slf4j
 public class KafkaProducerApplication {
 
     private static final String SERVER = "localhost:9092";
@@ -32,7 +34,7 @@ public class KafkaProducerApplication {
         Properties config = getProducerProperties();
 
         try (KafkaProducer<String, byte[]> producer = new KafkaProducer<>(config)) {
-            System.out.println("Producer запущен.");
+            log.info("Producer запущен.");
 
             for (int i = 0; i < 3; i++) {
                 try {
@@ -42,7 +44,7 @@ public class KafkaProducerApplication {
                     ProducerRecord<String, byte[]> sensorRecord = new ProducerRecord<>(SENSORS_TOPIC, sensorId, sensorEventBytes);
                     producer.send(sensorRecord, (metadata, e) -> {
                         if (e == null) {
-                            System.out.printf("Событие сенсора отправлено в топик %s\n", metadata.topic());
+                            log.info("Событие сенсора отправлено в топик %s\n", metadata.topic());
                         } else {
                             e.printStackTrace();
                         }
@@ -55,14 +57,14 @@ public class KafkaProducerApplication {
                     ProducerRecord<String, byte[]> hubRecord = new ProducerRecord<>(HUBS_TOPIC, hubId, hubEventBytes);
                     producer.send(hubRecord, (metadata, e) -> {
                         if (e == null) {
-                            System.out.printf("Событие хаба отправлено в топик %s\n", metadata.topic());
+                            log.info("Событие хаба отправлено в топик %s\n", metadata.topic());
                         } else {
                             e.printStackTrace();
                         }
                     });
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    System.err.println("Producer был прерван. Завершение работы...");
+                    log.error("Producer был прерван. Завершение работы...");
                     Thread.currentThread().interrupt();
                     break;
                 }
