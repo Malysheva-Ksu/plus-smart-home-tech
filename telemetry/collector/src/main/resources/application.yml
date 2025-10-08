@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: collector-service
+
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  producer:
+    client-id: smart-home-collector-service
+    acks: all
+  topics:
+    sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
+    hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
+    snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
+
+logging:
+  level:
+    ru.yandex.practicum: DEBUG
+    kafkaConfig: DEBUG
+    org.apache.kafka: INFO
