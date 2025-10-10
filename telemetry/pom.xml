@@ -12,11 +12,17 @@
     <artifactId>telemetry</artifactId>
     <packaging>pom</packaging>
 
+    <dependencies>
+    <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-protobuf</artifactId>
+    </dependency>
+    </dependencies>
+    
     <modules>
         <module>serialization</module>
         <module>collector</module>
     </modules>
-
 
     <repositories>
         <repository>
