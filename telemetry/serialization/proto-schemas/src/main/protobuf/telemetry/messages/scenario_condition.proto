@@ -1,0 +1,18 @@
+syntax = "proto3";
+import "telemetry/messages/condition_type.proto";
+import "telemetry/messages/condition_operation.proto";
+
+package telemetry.message.event;
+
+option java_multiple_files = true;
+option java_package = "ru.yandex.practicum.grpc.telemetry.event";
+
+message ScenarioConditionProto {
+  string sensor_id = 1;
+  ConditionTypeProto type = 2;
+  ConditionOperationProto operation = 3;
+  oneof value {
+    bool bool_value = 4;
+    int32 int_value = 5;
+  }
+}
