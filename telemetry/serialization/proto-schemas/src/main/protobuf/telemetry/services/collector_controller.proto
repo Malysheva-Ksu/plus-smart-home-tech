@@ -1,4 +1,7 @@
 syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
 import "telemetry/messages/device_added_event.proto";
 import "telemetry/messages/device_removed_event.proto";
 import "telemetry/messages/scenario_added_event.proto";
@@ -15,7 +18,7 @@ package telemetry.service.controller;
 option java_package = "ru.yandex.practicum.grpc.telemetry.controller";
 option java_outer_classname = "CollectorProto";
 
-message HubEventRequest {
+message HubEventProto {
   oneof event {
     telemetry.message.event.DeviceAddedEventProto deviceAddedEvent = 1;
     telemetry.message.event.DeviceRemovedEventProto deviceRemovedEvent = 2;
@@ -24,7 +27,7 @@ message HubEventRequest {
   }
 }
 
-message SensorEventRequest {
+message SensorEventProto {
   oneof event {
     telemetry.message.event.LightSensorEvent lightSensorEvent = 1;
     telemetry.message.event.TemperatureSensorEvent temperatureSensorEvent = 2;
@@ -34,12 +37,7 @@ message SensorEventRequest {
   }
 }
 
-message ReceiveResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-service CollectorService {
-  rpc ReceiveHubEvent (HubEventRequest) returns (ReceiveResponse);
-  rpc ReceiveSensorData (SensorEventRequest) returns (ReceiveResponse);
+service CollectorController {
+  rpc CollectHubEvent (HubEventProto) returns (google.protobuf.Empty);
+  rpc CollectSensorEvent (SensorEventProto) returns (google.protobuf.Empty);
 }
