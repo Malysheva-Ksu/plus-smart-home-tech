@@ -1,4 +1,4 @@
-package server;
+package server.service;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
