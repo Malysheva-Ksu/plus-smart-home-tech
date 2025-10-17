@@ -1,6 +1,22 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+import "telemetry/messages/device_added_event.proto";
+import "telemetry/messages/device_removed_event.proto";
+import "telemetry/messages/scenario_added_event.proto";
+import "telemetry/messages/scenario_removed_event.proto";
 
 package telemetry.message.event;
 
 option java_multiple_files = true;
 option java_package = "ru.yandex.practicum.grpc.telemetry.event";
+
+message HubEventProto {
+  string hub_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  oneof payload {
+    DeviceAddedEventProto device_added = 3;
+    DeviceRemovedEventProto device_removed = 4;
+    ScenarioAddedEventProto scenario_added = 5;
+    ScenarioRemovedEventProto scenario_removed = 6;
+  }
+}
