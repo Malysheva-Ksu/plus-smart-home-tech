@@ -1,43 +1,15 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-
-import "telemetry/messages/device_added_event.proto";
-import "telemetry/messages/device_removed_event.proto";
-import "telemetry/messages/scenario_added_event.proto";
-import "telemetry/messages/scenario_removed_event.proto";
-import "telemetry/messages/light_sensor_event.proto";
-import "telemetry/messages/temperature_sensor_event.proto";
-import "telemetry/messages/switch_sensor_event.proto";
-import "telemetry/messages/climate_sensor_event.proto";
-import "telemetry/messages/motion_sensor_event.proto";
-
-
 package telemetry.service.controller;
 
+import "google/protobuf/empty.proto";
+import "telemetry/messages/hub_event.proto";
+import "telemetry/messages/sensor_event.proto";
+
 option java_package = "ru.yandex.practicum.grpc.telemetry.controller";
-option java_outer_classname = "CollectorProto";
-
-message HubEventProto {
-  oneof event {
-    telemetry.message.event.DeviceAddedEventProto deviceAddedEvent = 1;
-    telemetry.message.event.DeviceRemovedEventProto deviceRemovedEvent = 2;
-    telemetry.message.event.ScenarioAddedEventProto scenarioAddedEvent = 3;
-    telemetry.message.event.ScenarioRemovedEventProto scenarioRemovedEvent = 4;
-  }
-}
-
-message SensorEventProto {
-  oneof event {
-    telemetry.message.event.LightSensorEvent lightSensorEvent = 1;
-    telemetry.message.event.TemperatureSensorEvent temperatureSensorEvent = 2;
-    telemetry.message.event.SwitchSensorEvent smartSwitchEvent = 3;
-    telemetry.message.event.ClimateSensorEvent climateSensorEvent = 4;
-    telemetry.message.event.MotionSensorEvent motionSensorEvent = 5;
-  }
-}
+option java_outer_classname = "CollectorServiceProto";
 
 service CollectorController {
-  rpc CollectHubEvent (HubEventProto) returns (google.protobuf.Empty);
-  rpc CollectSensorEvent (SensorEventProto) returns (google.protobuf.Empty);
+  rpc CollectHubEvent (telemetry.message.event.HubEventProto) returns (google.protobuf.Empty);
+  rpc CollectSensorEvent (telemetry.message.event.SensorEventProto) returns (google.protobuf.Empty);
 }

@@ -9,6 +9,7 @@ import dto.hub.DeviceRemovedEventDto;
 import dto.hub.ScenarioAddedEventDto;
 import dto.hub.ScenarioRemovedEventDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import service.resolver.RawSensorEventHandler;
 
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventTypeResolver {
@@ -57,5 +59,20 @@ public class EventTypeResolver {
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + eventType);
         }
+    }
+
+    private String extractEventType(Map<String, Object> rawEvent) {
+        Object eventType = rawEvent.get("eventType");
+
+        if (eventType == null) {
+            eventType = rawEvent.get("type");
+        }
+
+        if (eventType == null) {
+            log.warn("Event type not found in raw event: {}", rawEvent);
+            return "UNKNOWN";
+        }
+
+        return eventType.toString();
     }
 }
