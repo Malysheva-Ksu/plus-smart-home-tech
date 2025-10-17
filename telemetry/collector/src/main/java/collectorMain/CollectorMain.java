@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         R2dbcAutoConfiguration.class,
         R2dbcDataAutoConfiguration.class
 })
-@ComponentScan(basePackages = {"collectorMain", "controller", "service", "dto", "kafkaConfig"})
+@ComponentScan(basePackages = {"collectorMain", "collectorMain/controller", "service", "dto", "kafkaConfig"})
 public class CollectorMain {
 
     public static void main(String[] args) {
