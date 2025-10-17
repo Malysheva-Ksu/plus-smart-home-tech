@@ -23,6 +23,7 @@
         <module>producer</module>
         <module>grpc-server</module>
         <module>grpc-client</module>
+        <module>aggregator</module>
     </modules>
 
     <properties>
