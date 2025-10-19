@@ -14,7 +14,6 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Properties;
 
 @Slf4j
 @Component
@@ -25,9 +24,10 @@ public class AggregationStarter {
     private final KafkaProducer<String, Object> producer;
     private final AggregationService aggregationService;
 
-    @Value("${spring.kafka.consumer.properties.app.kafka.topic.sensors}")
+    @Value("${app.kafka.topic.sensors}")
     private String sensorsTopic;
-    @Value("${spring.kafka.producer.properties.app.kafka.topic.snapshots}")
+
+    @Value("${app.kafka.topic.snapshots}")
     private String snapshotsTopic;
 
     public void start() {

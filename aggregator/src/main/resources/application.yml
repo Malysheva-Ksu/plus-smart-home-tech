@@ -10,6 +10,8 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: kafka.SensorEventDeserializer
       auto-offset-reset: earliest
+      properties:
+        specific.avro.reader: true
 
     producer:
       client-id: aggregator-service-producer
@@ -19,10 +21,11 @@ spring:
       properties:
         schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
 
-kafka:
-  topics:
-    sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
-    snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
+app:
+  kafka:
+    topic:
+      sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
+      snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
 
 logging:
   level:
