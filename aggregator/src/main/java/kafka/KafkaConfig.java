@@ -37,14 +37,8 @@ public class KafkaConfig {
     @Value("${spring.kafka.producer.key-serializer}")
     private String keySerializer;
 
-    @Value("${spring.kafka.producer.value-serializer}")
-    private String valueSerializer;
-
     @Value("${spring.kafka.producer.acks}")
     private String acks;
-
-    @Value("${spring.kafka.producer.properties.schema.registry.url}")
-    private String schemaRegistryUrl;
 
     @Bean
     public KafkaConsumer<String, SensorEventAvro> kafkaConsumer() {
@@ -66,9 +60,8 @@ public class KafkaConfig {
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.CLIENT_ID_CONFIG, clientId);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, SensorsSnapshotSerializer.class.getName());
         props.put(ProducerConfig.ACKS_CONFIG, acks);
-        props.put("schema.registry.url", schemaRegistryUrl);
 
         log.info("Создан Kafka Producer: bootstrap={}, client={}", bootstrapServers, clientId);
         return new KafkaProducer<>(props);
