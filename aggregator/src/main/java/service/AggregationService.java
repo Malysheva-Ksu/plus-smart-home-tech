@@ -30,7 +30,7 @@ public class AggregationService {
                 key -> {
                     log.info("Создаём новый снапшот для хаба: {}", key);
                     SensorsSnapshotAvro newSnapshot = new SensorsSnapshotAvro();
-                    newSnapshot.setHubId(hubId);
+                    newSnapshot.setHubId(key);
                     newSnapshot.setTimestamp(Instant.EPOCH);
                     newSnapshot.setSensorsState(new HashMap<>());
                     return newSnapshot;
@@ -45,23 +45,26 @@ public class AggregationService {
         if (oldState == null) {
             log.debug("Новый датчик, добавляем в снапшот");
             shouldUpdate = true;
-        } else if (oldState.getTimestamp().isBefore(event.getTimestamp())) {
-            // Проверяем, изменились ли данные
+        } else {
+            // Проверяем timestamp: событие должно быть НЕ старше
+            if (event.getTimestamp().isBefore(oldState.getTimestamp())) {
+                log.debug("Событие устарело (timestamp старше), пропускаем");
+                return Optional.empty();
+            }
+
             if (!oldState.getData().equals(event.getPayload())) {
                 log.debug("Данные изменились, обновляем снапшот");
                 shouldUpdate = true;
             } else {
-                log.debug("Данные не изменились, но timestamp новее - пропускаем");
+                log.debug("Данные не изменились, пропускаем");
+                return Optional.empty();
             }
-        } else {
-            log.debug("Событие устарело, пропускаем");
         }
 
         if (!shouldUpdate) {
             return Optional.empty();
         }
 
-        // Обновляем состояние
         SensorStateAvro newState = new SensorStateAvro();
         newState.setTimestamp(event.getTimestamp());
         newState.setData(event.getPayload());
