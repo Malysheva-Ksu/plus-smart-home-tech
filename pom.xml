@@ -24,6 +24,7 @@
         <module>grpc-server</module>
         <module>grpc-client</module>
         <module>aggregator</module>
+        <module>analyzer</module>
     </modules>
 
     <properties>
