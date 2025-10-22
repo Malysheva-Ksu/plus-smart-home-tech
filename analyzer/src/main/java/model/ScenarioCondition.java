@@ -8,34 +8,41 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "scenario_conditions")
 @IdClass(ScenarioCondition.ScenarioConditionId.class)
 public class ScenarioCondition {
 
     @Id
+    @Column(name = "scenario_id")
+    private Long scenarioId;
+
+    @Id
+    @Column(name = "sensor_id")
+    private String sensorId;
+
+    @Id
+    @Column(name = "condition_id")
+    private Long conditionId;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scenario_id", nullable = false)
+    @JoinColumn(name = "scenario_id", insertable = false, updatable = false)
     private Scenario scenario;
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sensor_id", nullable = false)
+    @JoinColumn(name = "sensor_id", insertable = false, updatable = false)
     private Sensor sensor;
 
-    @Id
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "condition_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "condition_id", insertable = false, updatable = false)
     private Condition condition;
 
     @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ScenarioConditionId implements Serializable {
-        private Long scenario;
-        private String sensor;
-        private Long condition;
+        private Long scenarioId;
+        private String sensorId;
+        private Long conditionId;
     }
 }

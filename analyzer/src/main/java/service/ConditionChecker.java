@@ -43,8 +43,8 @@ public class ConditionChecker {
 
     private boolean checkCondition(Condition condition, SensorStateAvro sensorState) {
         Object data = sensorState.getData();
-        ConditionType type = condition.getType();
-        ConditionOperation operation = condition.getOperation();
+        ConditionType type = ConditionType.valueOf(condition.getType());
+        ConditionOperation operation = ConditionOperation.valueOf(condition.getOperation());
         int expectedValue = condition.getValue();
 
         Integer actualValue = extractValue(data, type);
