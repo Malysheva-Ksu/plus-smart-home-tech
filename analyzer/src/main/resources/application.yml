@@ -29,13 +29,13 @@ spring:
       snapshots:
         group-id: analyzer-snapshots-group
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: kafka.deserializer.SensorsSnapshotDeserializer
+        value-deserializer: kafka.SensorsSnapshotDeserializer
         auto-offset-reset: earliest
 
       hubs:
         group-id: analyzer-hubs-group
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: kafka.deserializer.HubEventDeserializer
+        value-deserializer: kafka.HubEventDeserializer
         auto-offset-reset: earliest
 
 grpc:
