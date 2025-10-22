@@ -19,24 +19,10 @@ spring:
 
   sql:
     init:
-      mode: always
-      schema-locations: classpath:schema.sql
+      mode: never
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-
-    consumer:
-      snapshots:
-        group-id: analyzer-snapshots-group
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: kafka.SensorsSnapshotDeserializer
-        auto-offset-reset: earliest
-
-      hubs:
-        group-id: analyzer-hubs-group
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: kafka.HubEventDeserializer
-        auto-offset-reset: earliest
 
 grpc:
   client:
@@ -51,6 +37,17 @@ app:
     topic:
       snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
       hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
+    consumer:
+      snapshots:
+        group-id: analyzer-snapshots-group
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: kafka.SensorsSnapshotDeserializer
+        auto-offset-reset: earliest
+      hubs:
+        group-id: analyzer-hubs-group
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: kafka.HubEventDeserializer
+        auto-offset-reset: earliest
 
 logging:
   level:

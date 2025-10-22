@@ -20,7 +20,7 @@ import processor.SnapshotProcessor;
         "processor",
         "repository"
 })
-@EntityScan(basePackages = "model.entity")
+@EntityScan(basePackages = "model")
 @EnableJpaRepositories(basePackages = "repository")
 public class Analyzer {
 
