@@ -1,6 +1,10 @@
 spring:
   application:
     name: analyzer-service
+    flyway:
+      enabled: false
+      liquibase:
+        enabled: false
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/analyzer}
