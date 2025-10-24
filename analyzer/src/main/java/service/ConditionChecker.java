@@ -62,17 +62,22 @@ public class ConditionChecker {
         }
 
         try {
-            Map<String, Object> payload = (Map<String, Object>) data;
+            Map<?, ?> payload = (Map<?, ?>) data;
+            Object rawValue = null;
 
             switch (type) {
                 case TEMPERATURE:
-                    return (Integer) payload.get("temperature_c");
+                    rawValue = payload.get("temperature_c");
+                    break;
                 case HUMIDITY:
-                    return (Integer) payload.get("humidity");
+                    rawValue = payload.get("humidity");
+                    break;
                 case CO2LEVEL:
-                    return (Integer) payload.get("co2_level");
+                    rawValue = payload.get("co2_level");
+                    break;
                 case LUMINOSITY:
-                    return (Integer) payload.get("luminosity");
+                    rawValue = payload.get("luminosity");
+                    break;
                 case MOTION:
                     Boolean motion = (Boolean) payload.get("motion");
                     return motion != null ? (motion ? 1 : 0) : null;
@@ -83,8 +88,18 @@ public class ConditionChecker {
                     log.warn("Неизвестный тип условия: {}", type);
                     return null;
             }
+
+            if (rawValue instanceof Number) {
+                return ((Number) rawValue).intValue();
+            }
+
+            log.warn("Значение для типа {} не является числом. Фактический тип: {}",
+                    type, rawValue != null ? rawValue.getClass().getSimpleName() : "null");
+            return null;
+
         } catch (Exception e) {
             log.error("Ошибка при извлечении значения из payload", e);
+            log.error("Произошла ошибка при обработке данных: {}", data.getClass().getSimpleName());
             return null;
         }
     }
