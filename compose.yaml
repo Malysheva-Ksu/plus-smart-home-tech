@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15-alpine
@@ -24,8 +26,8 @@ services:
     hostname: kafka
     container_name: kafka
     ports:
-      - "9092:9092"  # for client connections
-      - "9101:9101"  # JMX
+      - "9092:9092"
+      - "9101:9101"
     restart: unless-stopped
     environment:
       KAFKA_NODE_ID: 1
@@ -39,7 +41,7 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:29092"]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -65,6 +67,23 @@ services:
       echo \"Topics created successfully\"'"
     init: true
 
+  analyzer:
+    image: <ВАШ_ОБРАЗ_ANALYZER>
+    container_name: analyzer
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      hub-router:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+    KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    DATASOURCE_URL: jdbc:postgresql://postgres:5432/analyzer
+  
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
