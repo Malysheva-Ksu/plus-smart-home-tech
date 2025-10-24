@@ -8,7 +8,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
@@ -18,7 +17,8 @@ import java.util.Properties;
 @Configuration
 public class KafkaConsumerConfig {
 
-    private final String bootstrapServers;
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
     @Value("${app.kafka.consumer.snapshots.group-id}")
     private String snapshotsGroupId;
@@ -26,17 +26,9 @@ public class KafkaConsumerConfig {
     @Value("${app.kafka.consumer.hubs.group-id}")
     private String hubsGroupId;
 
-    public KafkaConsumerConfig(Environment env) {
-        this.bootstrapServers = env.getProperty("KAFKA_BOOTSTRAP_SERVERS",
-                env.getProperty("spring.kafka.bootstrap-servers",
-                        "kafka:29092"));
-        log.info("Kafka Bootstrap Servers для ConsumerConfig: {}", bootstrapServers);
-    }
-
     @Bean
     public KafkaConsumer<String, SensorsSnapshotAvro> snapshotsConsumer() {
         Properties props = new Properties();
-        // Используем адрес, полученный в конструкторе
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, snapshotsGroupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
