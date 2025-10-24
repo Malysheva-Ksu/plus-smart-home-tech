@@ -24,7 +24,6 @@ spring:
   sql:
     init:
       mode: always
-      separator: "@@"
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}

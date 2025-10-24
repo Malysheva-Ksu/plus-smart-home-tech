@@ -1,39 +1,39 @@
-DROP TRIGGER IF EXISTS tr_bi_scenario_conditions_hub_id_check ON scenario_conditions CASCADE@@
-DROP TRIGGER IF EXISTS tr_bi_scenario_actions_hub_id_check ON scenario_actions CASCADE@@
+DROP TRIGGER IF EXISTS tr_bi_scenario_conditions_hub_id_check ON scenario_conditions CASCADE;
+DROP TRIGGER IF EXISTS tr_bi_scenario_actions_hub_id_check ON scenario_actions CASCADE;
 
-DROP FUNCTION IF EXISTS check_hub_id() CASCADE@@
+DROP FUNCTION IF EXISTS check_hub_id() CASCADE;
 
-DROP TABLE IF EXISTS scenario_actions CASCADE@@
-DROP TABLE IF EXISTS scenario_conditions CASCADE@@
-DROP TABLE IF EXISTS actions CASCADE@@
-DROP TABLE IF EXISTS conditions CASCADE@@
-DROP TABLE IF EXISTS scenarios CASCADE@@
-DROP TABLE IF EXISTS sensors CASCADE@@
+DROP TABLE IF EXISTS scenario_actions CASCADE;
+DROP TABLE IF EXISTS scenario_conditions CASCADE;
+DROP TABLE IF EXISTS actions CASCADE;
+DROP TABLE IF EXISTS conditions CASCADE;
+DROP TABLE IF EXISTS scenarios CASCADE;
+DROP TABLE IF EXISTS sensors CASCADE;
 
 CREATE TABLE scenarios (
     id BIGSERIAL PRIMARY KEY,
     hub_id VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     CONSTRAINT uq_scenario_hub_name UNIQUE(hub_id, name)
-)@@
+);
 
 CREATE TABLE sensors (
     id VARCHAR(255) PRIMARY KEY,
     hub_id VARCHAR(255) NOT NULL
-)@@
+);
 
 CREATE TABLE conditions (
     id BIGSERIAL PRIMARY KEY,
     type VARCHAR(50) NOT NULL,
     operation VARCHAR(50) NOT NULL,
     value INTEGER NOT NULL
-)@@
+);
 
 CREATE TABLE actions (
     id BIGSERIAL PRIMARY KEY,
     type VARCHAR(50) NOT NULL,
     value INTEGER NOT NULL
-)@@
+);
 
 CREATE TABLE scenario_conditions (
     scenario_id BIGINT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE scenario_conditions (
         REFERENCES sensors(id) ON DELETE CASCADE,
     CONSTRAINT fk_sc_condition FOREIGN KEY (condition_id) 
         REFERENCES conditions(id) ON DELETE CASCADE
-)@@
+);
 
 CREATE TABLE scenario_actions (
     scenario_id BIGINT NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE scenario_actions (
         REFERENCES sensors(id) ON DELETE CASCADE,
     CONSTRAINT fk_sa_action FOREIGN KEY (action_id) 
         REFERENCES actions(id) ON DELETE CASCADE
-)@@
+);
 
 CREATE OR REPLACE FUNCTION check_hub_id()
 RETURNS TRIGGER AS $$
@@ -90,17 +90,14 @@ BEGIN
     
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql
-@@
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tr_bi_scenario_conditions_hub_id_check
 BEFORE INSERT ON scenario_conditions
 FOR EACH ROW
-EXECUTE FUNCTION check_hub_id()
-@@
+EXECUTE FUNCTION check_hub_id();
 
 CREATE TRIGGER tr_bi_scenario_actions_hub_id_check
 BEFORE INSERT ON scenario_actions
 FOR EACH ROW
-EXECUTE FUNCTION check_hub_id()
-@@
+EXECUTE FUNCTION check_hub_id();
