@@ -20,7 +20,7 @@ spring:
   sql:
     init:
       mode: always
-      separator: @@
+      separator: "@@"
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
