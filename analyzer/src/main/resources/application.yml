@@ -7,7 +7,7 @@ spring:
         enabled: false
 
   datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/analyzer}
+    url: ${DATASOURCE_URL:jdbc:postgresql://postgres:5432/analyzer}
     username: ${DATASOURCE_USERNAME:postgres}
     password: ${DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -27,7 +27,7 @@ spring:
       separator: "@@"
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
 
 grpc:
   client:
