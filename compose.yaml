@@ -26,17 +26,21 @@ services:
     hostname: kafka
     container_name: kafka
     ports:
-      - "9092:9092"
-      - "9101:9101"
+    - "9092:9092"
+    - "9101:9101"
     restart: unless-stopped
     environment:
       KAFKA_NODE_ID: 1
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092'
+
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+
       KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+
       CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
     volumes:
       - kafka_data:/var/lib/kafka/data
@@ -95,8 +99,7 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       DATASOURCE_URL: jdbc:postgresql://postgres:5432/analyzer
-
-    command: ["/bin/sh", "-c", "echo 'Waiting for Kafka to be fully healthy via Docker healthcheck...' && sleep 10 && echo 'Starting Analyzer.' && java -jar /app/app.jar"]
+      command: ["/bin/sh", "-c", "echo 'Waiting for Kafka port...' && while ! nc -z kafka 29092; do sleep 1; done; echo 'Kafka port open. Waiting 10s for broker readiness...' && sleep 10 && echo 'Starting Analyzer.' && java -jar /app/app.jar"]
 
   pgadmin:
     image: dpage/pgadmin4:latest
