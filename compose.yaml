@@ -67,8 +67,20 @@ services:
       echo \"Topics created successfully\"'"
     init: true
 
+  hub-router:
+    build:
+      context: ./hub-router
+      dockerfile: Dockerfile
+    container_name: hub-router
+    hostname: hub-router
+    ports:
+      - "59090:59090"
+    restart: unless-stopped
+
   analyzer:
-    image: <ВАШ_ОБРАЗ_ANALYZER>
+    build:
+      context: ./analyzer
+      dockerfile: Dockerfile
     container_name: analyzer
     depends_on:
       postgres:
@@ -81,9 +93,9 @@ services:
       - "8080:8080"
     restart: unless-stopped
     environment:
-    KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-    DATASOURCE_URL: jdbc:postgresql://postgres:5432/analyzer
-  
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/analyzer
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
