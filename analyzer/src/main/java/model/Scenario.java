@@ -3,6 +3,7 @@ package model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "scenarios")
+@EqualsAndHashCode(of = "id")
 public class Scenario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

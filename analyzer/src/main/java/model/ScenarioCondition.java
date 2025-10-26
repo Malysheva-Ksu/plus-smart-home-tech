@@ -3,6 +3,7 @@ package model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Table(name = "scenario_conditions")
 @IdClass(ScenarioCondition.ScenarioConditionId.class)
+@EqualsAndHashCode(of = {"scenarioId", "sensorId", "conditionId"})
 public class ScenarioCondition {
 
     @Id
