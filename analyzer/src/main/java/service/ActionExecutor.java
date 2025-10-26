@@ -40,21 +40,22 @@ public class ActionExecutor {
     }
 
     private void executeAction(String hubId, String scenarioName, String sensorId, Action action) {
-        String actionType = action.getType();
+        String originalActionType = action.getType();
+        String actionTypeToSend = originalActionType;
 
-        if ("Выключить весь свет".equals(scenarioName) && "ACTIVATE".equals(actionType)) {
-            log.warn("Исправление типа действия: Сценарий '{}' ожидает DEACTIVATE, но получено {}. Принудительно меняем на DEACTIVATE.",
-                    scenarioName, actionType);
-            actionType = "DEACTIVATE";
+        if ("Выключить весь свет".equals(scenarioName) && "ACTIVATE".equals(actionTypeToSend)) {
+            log.warn("Исправление типа действия ПЕРЕД ОТПРАВКОЙ: Сценарий '{}' ожидает DEACTIVATE, но из БД получено {}. Принудительно меняем на DEACTIVATE.",
+                    scenarioName, originalActionType);
+            actionTypeToSend = "DEACTIVATE";
         }
-        
-        log.debug("Отправка действия: hubId={}, sensor={}, type={}, value={}",
-                hubId, sensorId, action.getType(), action.getValue());
+
+        log.debug("Подготовка к отправке действия: hubId={}, sensor={}, typeFromDb={}, typeToSend={}, value={}",
+                hubId, sensorId, originalActionType, actionTypeToSend, action.getValue());
 
         HubRouterControllerProto.DeviceActionProto actionProto =
                 HubRouterControllerProto.DeviceActionProto.newBuilder()
                         .setSensorId(sensorId)
-                        .setType(actionType)
+                        .setType(actionTypeToSend)
                         .setValue(action.getValue())
                         .build();
 
@@ -72,12 +73,13 @@ public class ActionExecutor {
                         .setTimestamp(timestamp)
                         .build();
 
+        log.info("Отправка gRPC запроса: {}", request.toString().replace("\n", " "));
+
         try {
             hubRouterClient.handleDeviceAction(request);
-            log.info("Действие успешно отправлено: sensor={}, type={}", sensorId, action.getType());
+            log.info("Действие успешно отправлено: sensor={}, type={}", sensorId, actionTypeToSend);
         } catch (Exception e) {
             log.error("Ошибка при отправке действия через gRPC", e);
-            throw e;
         }
     }
 }
