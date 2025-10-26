@@ -31,8 +31,6 @@ public class ScenarioService {
     @Transactional
     public void addScenario(String hubId, ScenarioAddedEventAvro event) {
 
-        entityManager.clear();
-
         String scenarioName = event.getName().toString();
 
         log.info("Добавление сценария: hubId={}, name={}", hubId, scenarioName);
@@ -170,8 +168,6 @@ public class ScenarioService {
         scenario.setConditions(newConditions);
         scenario.setActions(newActions);
         scenarioRepository.save(scenario);
-
-        entityManager.clear();
 
         log.info("Сценарий {} для хаба {} успешно добавлен с {} условиями и {} действиями",
                 scenarioName, hubId, scenario.getConditions().size(), scenario.getActions().size());
