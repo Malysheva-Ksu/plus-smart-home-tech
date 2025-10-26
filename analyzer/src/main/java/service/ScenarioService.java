@@ -27,8 +27,6 @@ public class ScenarioService {
     private final SensorRepository sensorRepository;
     private final ConditionRepository conditionRepository;
     private final ActionRepository actionRepository;
-    private final ScenarioConditionRepository scenarioConditionRepository;
-    private final ScenarioActionRepository scenarioActionRepository;
 
     private final EntityManager entityManager;
 
@@ -56,10 +54,9 @@ public class ScenarioService {
         Scenario scenario = new Scenario();
         scenario.setHubId(hubId);
         scenario.setName(scenarioName);
-        scenario.setConditions(new ArrayList<>());
-        scenario.setActions(new ArrayList<>());
 
-        scenario = scenarioRepository.save(scenario);
+        List<ScenarioCondition> newConditions = new ArrayList<>();
+        List<ScenarioAction> newActions = new ArrayList<>();
 
         for (ScenarioConditionAvro conditionAvro : event.getConditions()) {
             String sensorId = conditionAvro.getSensorId().toString();
@@ -99,15 +96,14 @@ public class ScenarioService {
             condition = conditionRepository.save(condition);
 
             ScenarioCondition scenarioCondition = new ScenarioCondition();
-            scenarioCondition.setScenarioId(scenario.getId());
+
             scenarioCondition.setSensorId(sensorId);
             scenarioCondition.setConditionId(condition.getId());
             scenarioCondition.setScenario(scenario);
             scenarioCondition.setSensor(sensor);
             scenarioCondition.setCondition(condition);
 
-            scenarioConditionRepository.save(scenarioCondition);
-            scenario.getConditions().add(scenarioCondition);
+            newConditions.add(scenarioCondition);
         }
 
         for (DeviceActionAvro actionAvro : event.getActions()) {
@@ -147,16 +143,18 @@ public class ScenarioService {
             action = actionRepository.save(action);
 
             ScenarioAction scenarioAction = new ScenarioAction();
-            scenarioAction.setScenarioId(scenario.getId());
             scenarioAction.setSensorId(sensorId);
             scenarioAction.setActionId(action.getId());
             scenarioAction.setScenario(scenario);
             scenarioAction.setSensor(sensor);
             scenarioAction.setAction(action);
 
-            scenarioActionRepository.save(scenarioAction);
-            scenario.getActions().add(scenarioAction);
+            newActions.add(scenarioAction);
         }
+
+        scenario.setConditions(newConditions);
+        scenario.setActions(newActions);
+        scenario = scenarioRepository.save(scenario);
 
         log.info("Сценарий {} для хаба {} успешно добавлен с {} условиями и {} действиями",
                 scenarioName, hubId, scenario.getConditions().size(), scenario.getActions().size());
