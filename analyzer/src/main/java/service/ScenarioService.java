@@ -1,5 +1,6 @@
 package service;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
@@ -29,6 +30,8 @@ public class ScenarioService {
     private final ScenarioConditionRepository scenarioConditionRepository;
     private final ScenarioActionRepository scenarioActionRepository;
 
+    private final EntityManager entityManager;
+
     @Transactional
     public void addScenario(String hubId, ScenarioAddedEventAvro event) {
         String scenarioName = event.getName().toString();
@@ -46,6 +49,8 @@ public class ScenarioService {
 
             scenarioRepository.delete(oldScenario);
             scenarioRepository.flush();
+
+            entityManager.clear();
         }
 
         Scenario scenario = new Scenario();
@@ -53,6 +58,7 @@ public class ScenarioService {
         scenario.setName(scenarioName);
         scenario.setConditions(new ArrayList<>());
         scenario.setActions(new ArrayList<>());
+
         scenario = scenarioRepository.save(scenario);
 
         for (ScenarioConditionAvro conditionAvro : event.getConditions()) {
@@ -118,8 +124,22 @@ public class ScenarioService {
             }
 
             Object valueObj = actionAvro.getValue();
-            Integer value = (valueObj instanceof Integer) ? (Integer) valueObj :
-                    Integer.valueOf(valueObj.toString());
+            Integer value;
+
+            if (valueObj instanceof Integer) {
+                value = (Integer) valueObj;
+            } else if (valueObj instanceof Long) {
+                value = ((Long) valueObj).intValue();
+            } else if (valueObj instanceof Boolean) {
+                value = (Boolean) valueObj ? 1 : 0;
+            } else {
+                try {
+                    value = Integer.valueOf(valueObj.toString());
+                } catch (NumberFormatException e) {
+                    log.error("Не удалось преобразовать значение '{}' в число для действия.", valueObj.toString());
+                    throw new IllegalArgumentException("Неверный формат данных для действия: " + valueObj.toString(), e);
+                }
+            }
 
             Action action = new Action();
             action.setType(actionAvro.getType().toString());
