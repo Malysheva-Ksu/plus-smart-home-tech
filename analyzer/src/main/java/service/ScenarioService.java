@@ -38,7 +38,13 @@ public class ScenarioService {
         Optional<Scenario> existing = scenarioRepository.findByHubIdAndName(hubId, scenarioName);
         if (existing.isPresent()) {
             log.warn("Сценарий {} для хаба {} уже существует, удаляем старый", scenarioName, hubId);
-            scenarioRepository.delete(existing.get());
+
+            Scenario oldScenario = existing.get();
+
+            oldScenario.getConditions().clear();
+            oldScenario.getActions().clear();
+
+            scenarioRepository.delete(oldScenario);
             scenarioRepository.flush();
         }
 
