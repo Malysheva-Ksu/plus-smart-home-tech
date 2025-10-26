@@ -56,37 +56,77 @@ public class ConditionChecker {
         return compareValues(actualValue, operation, expectedValue);
     }
 
+    private boolean compareValues(int actualValue, ConditionOperation operation, int expectedValue) {
+        switch (operation) {
+            case EQUALS:
+                return actualValue == expectedValue;
+            case GREATER_THAN:
+                return actualValue > expectedValue;
+            case LOWER_THAN:
+                return actualValue < expectedValue;
+            default:
+                log.warn("Неизвестная операция: {}", operation);
+                return false;
+        }
+    }
+
     private Integer extractValue(Object data, ConditionType type) {
         if (data == null) {
             return null;
         }
 
         try {
-            Map<?, ?> payload = (Map<?, ?>) data;
             Object rawValue = null;
 
-            switch (type) {
-                case TEMPERATURE:
-                    rawValue = payload.get("temperature_c");
-                    break;
-                case HUMIDITY:
-                    rawValue = payload.get("humidity");
-                    break;
-                case CO2LEVEL:
-                    rawValue = payload.get("co2_level");
-                    break;
-                case LUMINOSITY:
-                    rawValue = payload.get("luminosity");
-                    break;
-                case MOTION:
-                    Boolean motion = (Boolean) payload.get("motion");
+            if (data instanceof ru.yandex.practicum.kafka.telemetry.event.ClimateSensorAvro climateData) {
+
+                switch (type) {
+                    case TEMPERATURE:
+                        rawValue = climateData.getTemperatureC();
+                        break;
+                    case HUMIDITY:
+                        rawValue = climateData.getHumidity();
+                        break;
+                    case CO2LEVEL:
+                        rawValue = climateData.getCo2Level();
+                        break;
+                    default:
+                        log.warn("Неизвестный тип условия {} для ClimateSensorAvro", type);
+                        return null;
+                }
+
+            } else if (data instanceof ru.yandex.practicum.kafka.telemetry.event.MotionSensorAvro motionData) {
+
+                if (type == ConditionType.MOTION) {
+                    Boolean motion = motionData.getMotion();
                     return motion != null ? (motion ? 1 : 0) : null;
-                case SWITCH:
-                    Boolean state = (Boolean) payload.get("state");
-                    return state != null ? (state ? 1 : 0) : null;
-                default:
-                    log.warn("Неизвестный тип условия: {}", type);
+                } else {
+                    log.warn("Неверный тип условия {} для MotionSensorAvro", type);
                     return null;
+                }
+
+            } else if (data instanceof ru.yandex.practicum.kafka.telemetry.event.SwitchSensorAvro switchData) {
+
+                if (type == ConditionType.SWITCH) {
+                    Boolean state = switchData.getState();
+                    return state != null ? (state ? 1 : 0) : null;
+                } else {
+                    log.warn("Неверный тип условия {} для SwitchSensorAvro", type);
+                    return null;
+                }
+
+            } else if (data instanceof ru.yandex.practicum.kafka.telemetry.event.LightSensorAvro lightData) {
+
+                if (type == ConditionType.LUMINOSITY) {
+                    rawValue = lightData.getLuminosity();
+                } else {
+                    log.warn("Неверный тип условия {} для LightSensorAvro", type);
+                    return null;
+                }
+
+            } else {
+                log.error("Неизвестный тип данных датчика: {}", data.getClass().getName());
+                return null;
             }
 
             if (rawValue instanceof Number) {
@@ -99,22 +139,7 @@ public class ConditionChecker {
 
         } catch (Exception e) {
             log.error("Ошибка при извлечении значения из payload", e);
-            log.error("Произошла ошибка при обработке данных: {}", data.getClass().getSimpleName());
             return null;
-        }
-    }
-
-    private boolean compareValues(int actualValue, ConditionOperation operation, int expectedValue) {
-        switch (operation) {
-            case EQUALS:
-                return actualValue == expectedValue;
-            case GREATER_THAN:
-                return actualValue > expectedValue;
-            case LOWER_THAN:
-                return actualValue < expectedValue;
-            default:
-                log.warn("Неизвестная операция: {}", operation);
-                return false;
         }
     }
 }
