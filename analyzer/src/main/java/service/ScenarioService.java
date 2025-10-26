@@ -63,8 +63,22 @@ public class ScenarioService {
             }
 
             Object valueObj = conditionAvro.getValue();
-            Integer value = (valueObj instanceof Integer) ? (Integer) valueObj :
-                    Integer.valueOf(valueObj.toString());
+            Integer value;
+
+            if (valueObj instanceof Integer) {
+                value = (Integer) valueObj;
+            } else if (valueObj instanceof Long) {
+                value = ((Long) valueObj).intValue();
+            } else if (valueObj instanceof Boolean) {
+                value = (Boolean) valueObj ? 1 : 0;
+            } else {
+                try {
+                    value = Integer.valueOf(valueObj.toString());
+                } catch (NumberFormatException e) {
+                    log.error("Не удалось преобразовать значение '{}' в число для условия.", valueObj.toString());
+                    throw new IllegalArgumentException("Неверный формат данных для условия: " + valueObj.toString(), e);
+                }
+            }
 
             Condition condition = new Condition();
             condition.setType(conditionAvro.getType().toString());
