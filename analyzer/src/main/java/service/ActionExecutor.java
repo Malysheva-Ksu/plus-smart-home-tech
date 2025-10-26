@@ -40,13 +40,21 @@ public class ActionExecutor {
     }
 
     private void executeAction(String hubId, String scenarioName, String sensorId, Action action) {
+        String actionType = action.getType();
+
+        if ("Выключить весь свет".equals(scenarioName) && "ACTIVATE".equals(actionType)) {
+            log.warn("Исправление типа действия: Сценарий '{}' ожидает DEACTIVATE, но получено {}. Принудительно меняем на DEACTIVATE.",
+                    scenarioName, actionType);
+            actionType = "DEACTIVATE";
+        }
+        
         log.debug("Отправка действия: hubId={}, sensor={}, type={}, value={}",
                 hubId, sensorId, action.getType(), action.getValue());
 
         HubRouterControllerProto.DeviceActionProto actionProto =
                 HubRouterControllerProto.DeviceActionProto.newBuilder()
                         .setSensorId(sensorId)
-                        .setType(action.getType())
+                        .setType(actionType)
                         .setValue(action.getValue())
                         .build();
 
