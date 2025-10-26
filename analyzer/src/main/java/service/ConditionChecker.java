@@ -110,7 +110,7 @@ public class ConditionChecker {
                 return actualValue == expectedValue;
             case GREATER_THAN:
                 return actualValue > expectedValue;
-            case LESS_THAN:
+            case LOWER_THAN:
                 return actualValue < expectedValue;
             default:
                 log.warn("Неизвестная операция: {}", operation);
