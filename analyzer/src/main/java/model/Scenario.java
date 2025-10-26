@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -24,9 +25,9 @@ public class Scenario {
     private String name;
 
     @OneToMany(mappedBy = "scenario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ScenarioCondition> conditions;
+    private Set<ScenarioCondition> conditions;
 
     @OneToMany(mappedBy = "scenario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ScenarioAction> actions;
+    private Set<ScenarioAction> actions;
 
 }

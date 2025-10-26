@@ -14,9 +14,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -56,8 +54,8 @@ public class ScenarioService {
         scenario.setName(scenarioName);
         scenario = scenarioRepository.save(scenario);
 
-        List<ScenarioCondition> newConditions = new ArrayList<>();
-        List<ScenarioAction> newActions = new ArrayList<>();
+        Set<ScenarioCondition> newConditions = new HashSet<>();
+        Set<ScenarioAction> newActions = new HashSet<>();
 
         for (ScenarioConditionAvro conditionAvro : event.getConditions()) {
             String sensorId = conditionAvro.getSensorId().toString();
