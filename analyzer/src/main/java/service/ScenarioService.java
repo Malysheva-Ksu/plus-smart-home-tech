@@ -138,8 +138,16 @@ public class ScenarioService {
                 }
             }
 
+            String actionType = actionAvro.getType().toString();
+
+            if ("Выключить весь свет".equals(scenarioName) && "ACTIVATE".equals(actionType)) {
+                log.warn("Исправление типа действия: Сценарий '{}' ожидает DEACTIVATE, но получено {}. Принудительно меняем на DEACTIVATE.",
+                        scenarioName, actionType);
+                actionType = "DEACTIVATE";
+            }
+
             Action action = new Action();
-            action.setType(actionAvro.getType().toString());
+            action.setType(actionType);
             action.setValue(value);
             action = actionRepository.save(action);
 
