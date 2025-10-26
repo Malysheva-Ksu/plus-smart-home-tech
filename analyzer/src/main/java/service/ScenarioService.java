@@ -53,7 +53,8 @@ public class ScenarioService {
 
         Scenario scenario = new Scenario();
         scenario.setHubId(hubId);
-        scenario.setName(scenarioName);
+        scenario.setName(scenarioName);.
+        scenario = scenarioRepository.save(scenario);
 
         List<ScenarioCondition> newConditions = new ArrayList<>();
         List<ScenarioAction> newActions = new ArrayList<>();
@@ -96,6 +97,8 @@ public class ScenarioService {
             condition = conditionRepository.save(condition);
 
             ScenarioCondition scenarioCondition = new ScenarioCondition();
+
+            scenarioCondition.setScenarioId(scenario.getId());
 
             scenarioCondition.setSensorId(sensorId);
             scenarioCondition.setConditionId(condition.getId());
@@ -143,6 +146,9 @@ public class ScenarioService {
             action = actionRepository.save(action);
 
             ScenarioAction scenarioAction = new ScenarioAction();
+
+            scenarioAction.setScenarioId(scenario.getId());
+
             scenarioAction.setSensorId(sensorId);
             scenarioAction.setActionId(action.getId());
             scenarioAction.setScenario(scenario);
@@ -154,7 +160,7 @@ public class ScenarioService {
 
         scenario.setConditions(newConditions);
         scenario.setActions(newActions);
-        scenario = scenarioRepository.save(scenario);
+        scenarioRepository.save(scenario);
 
         log.info("Сценарий {} для хаба {} успешно добавлен с {} условиями и {} действиями",
                 scenarioName, hubId, scenario.getConditions().size(), scenario.getActions().size());
