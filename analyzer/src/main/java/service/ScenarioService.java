@@ -53,7 +53,7 @@ public class ScenarioService {
 
         Scenario scenario = new Scenario();
         scenario.setHubId(hubId);
-        scenario.setName(scenarioName);.
+        scenario.setName(scenarioName);
         scenario = scenarioRepository.save(scenario);
 
         List<ScenarioCondition> newConditions = new ArrayList<>();
