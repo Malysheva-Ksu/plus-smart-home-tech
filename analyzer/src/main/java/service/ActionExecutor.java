@@ -47,6 +47,7 @@ public class ActionExecutor {
             log.warn("Исправление типа действия ПЕРЕД ОТПРАВКОЙ: Сценарий '{}' ожидает DEACTIVATE, но из БД получено {}. Принудительно меняем на DEACTIVATE.",
                     scenarioName, originalActionType);
             actionTypeToSend = "DEACTIVATE";
+            action.setType("DEACTIVATE");
         }
 
         log.debug("Подготовка к отправке действия: hubId={}, sensor={}, typeFromDb={}, typeToSend={}, value={}",
