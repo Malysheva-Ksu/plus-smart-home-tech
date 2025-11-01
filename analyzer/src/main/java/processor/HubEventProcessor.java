@@ -95,7 +95,19 @@ public class HubEventProcessor implements Runnable {
 
     private void handleScenarioAdded(String hubId, ScenarioAddedEventAvro scenarioEvent) {
         log.info("Добавление сценария: name={}, hubId={}", scenarioEvent.getName(), hubId);
+
+        log.debug("Действия из Kafka (до исправления):");
+        for (DeviceActionAvro action : scenarioEvent.getActions()) {
+            log.debug("  sensor={}, type={}", action.getSensorId(), action.getType());
+        }
+
         scenarioEvent = fixScenarioActions(scenarioEvent);
+
+        log.debug("Действия после исправления:");
+        for (DeviceActionAvro action : scenarioEvent.getActions()) {
+            log.debug("  sensor={}, type={}", action.getSensorId(), action.getType());
+        }
+
         scenarioService.addScenario(hubId, scenarioEvent);
     }
 
