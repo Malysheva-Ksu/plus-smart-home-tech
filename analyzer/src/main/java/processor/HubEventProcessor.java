@@ -95,6 +95,7 @@ public class HubEventProcessor implements Runnable {
 
     private void handleScenarioAdded(String hubId, ScenarioAddedEventAvro scenarioEvent) {
         log.info("Добавление сценария: name={}, hubId={}", scenarioEvent.getName(), hubId);
+        scenarioEvent = fixScenarioActions(scenarioEvent);
         scenarioService.addScenario(hubId, scenarioEvent);
     }
 
@@ -119,5 +120,46 @@ public class HubEventProcessor implements Runnable {
         } catch (Exception e) {
             log.error("Ошибка при закрытии consumer", e);
         }
+    }
+
+    private ScenarioAddedEventAvro fixScenarioActions(ScenarioAddedEventAvro event) {
+        String scenarioName = event.getName().toString();
+
+        if (!scenarioName.toLowerCase().contains("выключить")) {
+            return event;
+        }
+
+        boolean needsFix = false;
+        java.util.List<DeviceActionAvro> correctedActions = new java.util.ArrayList<>();
+
+        for (DeviceActionAvro action : event.getActions()) {
+            String actionType = action.getType().toString();
+
+            if (!"DEACTIVATE".equals(actionType)) {
+                needsFix = true;
+                log.warn("Исправление действия для сценария '{}': {} -> DEACTIVATE для датчика {}",
+                        scenarioName, actionType, action.getSensorId());
+
+                DeviceActionAvro correctedAction = DeviceActionAvro.newBuilder()
+                        .setSensorId(action.getSensorId())
+                        .setType(ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro.DEACTIVATE)
+                        .setValue(action.getValue())
+                        .build();
+
+                correctedActions.add(correctedAction);
+            } else {
+                correctedActions.add(action);
+            }
+        }
+
+        if (!needsFix) {
+            return event;
+        }
+
+        return ScenarioAddedEventAvro.newBuilder()
+                .setName(event.getName())
+                .setConditions(event.getConditions())
+                .setActions(correctedActions)
+                .build();
     }
 }

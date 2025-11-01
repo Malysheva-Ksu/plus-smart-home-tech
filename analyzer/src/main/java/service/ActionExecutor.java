@@ -43,7 +43,7 @@ public class ActionExecutor {
         String originalActionType = action.getType();
         String actionTypeToSend = originalActionType;
 
-        if ("Выключить весь свет".equals(scenarioName)) {
+        if (scenarioName != null && scenarioName.contains("Выключить")) {
             log.warn("Исправление типа действия ПЕРЕД ОТПРАВКОЙ: Сценарий '{}' ожидает DEACTIVATE, но из БД получено {}. Принудительно меняем на DEACTIVATE.",
                     scenarioName, originalActionType);
             actionTypeToSend = "DEACTIVATE";
