@@ -4,6 +4,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Scenario;
+import model.ScenarioAction;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -83,8 +84,25 @@ public class SnapshotProcessor {
 
         for (Scenario scenario : scenarios) {
             try {
+
+                log.debug("Действия сценария {} из БД:", scenario.getName());
+                for (ScenarioAction sa : scenario.getActions()) {
+                    log.debug("  - sensor={}, type={}, value={}",
+                            sa.getSensor().getId(),
+                            sa.getAction().getType(),
+                            sa.getAction().getValue());
+                }
+
                 if (conditionChecker.checkScenarioConditions(scenario, snapshot)) {
                     log.info("Сценарий {} активирован для хаба {}", scenario.getName(), hubId);
+
+                    log.info("Действия перед выполнением:");
+                    for (ScenarioAction sa : scenario.getActions()) {
+                        log.info("  - sensor={}, type={}, value={}",
+                                sa.getSensor().getId(),
+                                sa.getAction().getType(),
+                                sa.getAction().getValue());
+                    }
 
                     actionExecutor.executeScenarioActions(scenario);
                 } else {

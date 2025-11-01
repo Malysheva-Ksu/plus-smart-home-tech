@@ -194,6 +194,23 @@ public class ScenarioService {
 
     @Transactional(readOnly = true)
     public List<Scenario> getScenariosByHubId(String hubId) {
-        return scenarioRepository.findByHubIdWithDetails(hubId);
+        List<Scenario> scenarios = scenarioRepository.findByHubIdWithDetails(hubId);
+
+        log.info("Чтение сценариев для хаба {}: найдено {}", hubId, scenarios.size());
+
+        for (Scenario scenario : scenarios) {
+            log.info("  Сценарий из БД: {}", scenario.getName());
+            log.info("    Условия: {}", scenario.getConditions().size());
+            log.info("    Действия: {}", scenario.getActions().size());
+
+            for (ScenarioAction sa : scenario.getActions()) {
+                log.info("      Action из БД: sensor={}, type={}, value={}",
+                        sa.getSensor().getId(),
+                        sa.getAction().getType(),
+                        sa.getAction().getValue());
+            }
+        }
+
+        return scenarios;
     }
 }
