@@ -141,6 +141,9 @@ public class ScenarioService {
 
             String actionType = actionAvro.getType().toString();
 
+            log.info("Создание Action из Avro: sensor={}, type={}, value={}",
+                    sensorId, actionType, value);
+
             if ("Выключить весь свет".equals(scenarioName) && "ACTIVATE".equals(actionType)) {
                 log.warn("Исправление типа действия: Сценарий '{}' ожидает DEACTIVATE, но получено {}. Принудительно меняем на DEACTIVATE.",
                         scenarioName, actionType);
@@ -151,6 +154,9 @@ public class ScenarioService {
             action.setType(actionType);
             action.setValue(value);
             action = actionRepository.save(action);
+
+            log.info("Action сохранён в БД: id={}, type={}, value={}",
+                    action.getId(), action.getType(), action.getValue());
 
             ScenarioAction scenarioAction = new ScenarioAction();
 

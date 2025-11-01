@@ -43,6 +43,9 @@ public class ActionExecutor {
         String originalActionType = action.getType();
         String actionTypeToSend = originalActionType;
 
+        log.info("Выполнение действия: hubId={}, scenario={}, sensor={}, type из БД={}, value={}",
+                hubId, scenarioName, sensorId, actionTypeToSend, action.getValue());
+
         if (scenarioName != null && scenarioName.contains("Выключить")) {
             log.warn("Исправление типа действия ПЕРЕД ОТПРАВКОЙ: Сценарий '{}' ожидает DEACTIVATE, но из БД получено {}. Принудительно меняем на DEACTIVATE.",
                     scenarioName, originalActionType);
