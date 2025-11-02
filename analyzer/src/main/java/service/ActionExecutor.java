@@ -62,5 +62,12 @@ public class ActionExecutor {
                         .setAction(actionProto)
                         .setTimestamp(timestamp)
                         .build();
+
+        log.info("Отправка команды: hub={}, scenario={}, sensor={}, type={}",
+                hubId, scenarioName, sensorId, actionTypeToSend);
+
+        hubRouterClient.handleDeviceAction(request);
+
+        log.info("Команда успешно отправлена");
     }
 }
