@@ -40,21 +40,7 @@ public class ActionExecutor {
     }
 
     private void executeAction(String hubId, String scenarioName, String sensorId, Action action) {
-        String originalActionType = action.getType();
-        String actionTypeToSend = originalActionType;
-
-        log.info("Выполнение действия: hubId={}, scenario={}, sensor={}, type из БД={}, value={}",
-                hubId, scenarioName, sensorId, actionTypeToSend, action.getValue());
-
-        if (scenarioName != null && scenarioName.contains("Выключить")) {
-            log.warn("Исправление типа действия ПЕРЕД ОТПРАВКОЙ: Сценарий '{}' ожидает DEACTIVATE, но из БД получено {}. Принудительно меняем на DEACTIVATE.",
-                    scenarioName, originalActionType);
-            actionTypeToSend = "DEACTIVATE";
-            action.setType("DEACTIVATE");
-        }
-
-        log.debug("Подготовка к отправке действия: hubId={}, sensor={}, typeFromDb={}, typeToSend={}, value={}",
-                hubId, sensorId, originalActionType, actionTypeToSend, action.getValue());
+        String actionTypeToSend = action.getType();
 
         HubRouterControllerProto.DeviceActionProto actionProto =
                 HubRouterControllerProto.DeviceActionProto.newBuilder()
@@ -76,14 +62,5 @@ public class ActionExecutor {
                         .setAction(actionProto)
                         .setTimestamp(timestamp)
                         .build();
-
-        log.info("Отправка gRPC запроса: {}", request.toString().replace("\n", " "));
-
-        try {
-            hubRouterClient.handleDeviceAction(request);
-            log.info("Действие успешно отправлено: sensor={}, type={}", sensorId, actionTypeToSend);
-        } catch (Exception e) {
-            log.error("Ошибка при отправке действия через gRPC", e);
-        }
     }
 }
