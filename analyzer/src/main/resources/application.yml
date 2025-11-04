@@ -49,6 +49,9 @@ app:
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         value-deserializer: kafka.HubEventDeserializer
         auto-offset-reset: earliest
+  hubrouter:
+    compensate-enum-mismatch: ${APP_HUBROUTER_COMPENSATE_ENUM_MISMATCH:false}
+    compensate-only-for-scenario: ${APP_HUBROUTER_COMPENSATE_ONLY_FOR_SCENARIO:Выключить весь свет}
 
 logging:
   level:

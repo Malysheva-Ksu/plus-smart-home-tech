@@ -7,6 +7,7 @@ import model.Action;
 import model.Scenario;
 import model.ScenarioAction;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.grpc.telemetry.hubrouter.HubRouterControllerGrpc.HubRouterControllerBlockingStub;
 import ru.yandex.practicum.grpc.telemetry.hubrouter.HubRouterControllerProto;
@@ -20,6 +21,12 @@ public class ActionExecutor {
 
     @GrpcClient("hub-router")
     private HubRouterControllerBlockingStub hubRouterClient;
+
+    @Value("${app.hubrouter.compensate-enum-mismatch:false}")
+    private boolean compensateEnumMismatch;
+
+    @Value("${app.hubrouter.compensate-only-for-scenario:Выключить весь свет}")
+    private String compensateOnlyForScenario;
 
     public void executeScenarioActions(Scenario scenario) {
         String hubId = scenario.getHubId();
@@ -40,13 +47,25 @@ public class ActionExecutor {
     }
 
     private void executeAction(String hubId, String scenarioName, String sensorId, Action action) {
-        String actionTypeToSend = action.getType();
+        String originalType = action.getType();
+        String actionTypeToSend = originalType;
+
+        if (compensateEnumMismatch && shouldCompensateForScenario(scenarioName)) {
+            actionTypeToSend = compensateType(originalType);
+            if (!actionTypeToSend.equals(originalType)) {
+                log.warn("COMPENSATE_ENUM: сценарий='{}', датчик='{}', оригинал='{}' -> отправляем='{}'",
+                        scenarioName, sensorId, originalType, actionTypeToSend);
+            } else {
+                log.debug("COMPENSATE_ENUM: сценарий='{}', датчик='{}', тип '{}' оставлен без изменений",
+                        scenarioName, sensorId, originalType);
+            }
+        }
 
         HubRouterControllerProto.DeviceActionProto actionProto =
                 HubRouterControllerProto.DeviceActionProto.newBuilder()
                         .setSensorId(sensorId)
                         .setType(actionTypeToSend)
-                        .setValue(action.getValue())
+                        .setValue(action.getValue() == null ? 0 : action.getValue())
                         .build();
 
         Instant now = Instant.now();
@@ -69,5 +88,24 @@ public class ActionExecutor {
         hubRouterClient.handleDeviceAction(request);
 
         log.info("Команда успешно отправлена");
+    }
+
+    private boolean shouldCompensateForScenario(String scenarioName) {
+        if (compensateOnlyForScenario == null || compensateOnlyForScenario.isBlank()) {
+            return true;
+        }
+        return compensateOnlyForScenario.equals(scenarioName);
+    }
+
+    private String compensateType(String original) {
+        if (original == null) return null;
+        switch (original) {
+            case "ACTIVATE":
+                return "DEACTIVATE";
+            case "DEACTIVATE":
+                return "ACTIVATE";
+            default:
+                return original;
+        }
     }
 }
