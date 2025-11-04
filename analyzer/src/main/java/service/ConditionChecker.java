@@ -25,10 +25,27 @@ public class ConditionChecker {
             String sensorId = scenarioCondition.getSensor().getId();
             Condition condition = scenarioCondition.getCondition();
 
-            SensorStateAvro sensorState = sensorsState.get(sensorId);
-            if (sensorState == null) {
+            if (sensorsState == null) {
+                log.debug("Snapshot.sensorsState == null для хаба {}", snapshot.getHubId());
+                return false;
+            }
+            if (!sensorsState.containsKey(sensorId)) {
                 log.debug("Датчик {} не найден в снапшоте, условие не выполнено", sensorId);
                 return false;
+            }
+
+            SensorStateAvro sensorState = sensorsState.get(sensorId);
+            if (sensorState == null) {
+                log.debug("SensorStateAvro == null для датчика {}, условие не выполнено", sensorId);
+                return false;
+            }
+
+            Object data = sensorState.getData();
+            if (data != null) {
+                log.debug("SensorState for {}: data.class={}, data={}", sensorId,
+                        data.getClass().getName(), data.toString());
+            } else {
+                log.debug("SensorState for {}: data == null", sensorId);
             }
 
             if (!checkCondition(condition, sensorState)) {
@@ -43,17 +60,38 @@ public class ConditionChecker {
 
     private boolean checkCondition(Condition condition, SensorStateAvro sensorState) {
         Object data = sensorState.getData();
-        ConditionType type = ConditionType.valueOf(condition.getType());
-        ConditionOperation operation = ConditionOperation.valueOf(condition.getOperation());
-        int expectedValue = condition.getValue();
+        ConditionType type;
+        ConditionOperation operation;
+        int expectedValue;
 
-        Integer actualValue = extractValue(data, type);
-        if (actualValue == null) {
-            log.warn("Не удалось извлечь значение типа {} из данных датчика", type);
+        try {
+            type = ConditionType.valueOf(condition.getType());
+        } catch (Exception e) {
+            log.warn("Неизвестный тип условия '{}' в DB. Ошибка: {}", condition.getType(), e.getMessage());
             return false;
         }
 
-        return compareValues(actualValue, operation, expectedValue);
+        try {
+            operation = ConditionOperation.valueOf(condition.getOperation());
+        } catch (Exception e) {
+            log.warn("Неизвестная операция '{}' в DB. Ошибка: {}", condition.getOperation(), e.getMessage());
+            return false;
+        }
+
+        expectedValue = condition.getValue();
+
+        Integer actualValue = extractValue(data, type);
+        if (actualValue == null) {
+            log.warn("Не удалось извлечь значение типа {} из данных датчика (data=={}).", type, data);
+            return false;
+        }
+
+        boolean result = compareValues(actualValue, operation, expectedValue);
+
+        log.debug("Сравнение: actual={} expected={} operation={} -> result={}",
+                actualValue, expectedValue, operation, result);
+
+        return result;
     }
 
     private boolean compareValues(int actualValue, ConditionOperation operation, int expectedValue) {
