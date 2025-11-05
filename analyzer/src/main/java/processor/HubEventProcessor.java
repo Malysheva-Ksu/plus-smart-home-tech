@@ -81,9 +81,11 @@ public class HubEventProcessor implements Runnable {
 
     private void handleDeviceAdded(String hubId, DeviceAddedEventAvro deviceEvent) {
         String sensorId = deviceEvent.getId().toString();
+        String deviceType = deviceEvent.getType().toString();
 
-        log.info("Добавление устройства: id={}, hubId={}", sensorId, hubId);
-        sensorService.addSensor(sensorId, hubId);
+        log.info("Добавление устройства: id={}, hubId={}, type={}",
+                sensorId, hubId, deviceType);
+        sensorService.addSensor(sensorId, hubId, deviceType);
     }
 
     private void handleDeviceRemoved(DeviceRemovedEventAvro deviceEvent) {

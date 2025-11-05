@@ -14,6 +14,14 @@ public class Sensor {
     @Id
     private String id;
 
+    @Column(nullable = true)
+    private String deviceType;
+
     @Column(name = "hub_id", nullable = false)
     private String hubId;
+
+    public Sensor(String id, String hubId) {
+        this.id = id;
+        this.hubId = hubId;
+    }
 }

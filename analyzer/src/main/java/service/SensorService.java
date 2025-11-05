@@ -17,7 +17,7 @@ public class SensorService {
     private final SensorRepository sensorRepository;
 
     @Transactional
-    public void addSensor(String sensorId, String hubId) {
+    public void addSensor(String sensorId, String hubId, String deviceType) {
         Optional<Sensor> existing = sensorRepository.findById(sensorId);
         if (existing.isPresent()) {
             log.debug("Датчик {} уже существует для хаба {}", sensorId, hubId);
@@ -25,8 +25,10 @@ public class SensorService {
         }
 
         Sensor sensor = new Sensor(sensorId, hubId);
+        sensor.setDeviceType(deviceType); // ← Сохраняем тип
         sensorRepository.save(sensor);
-        log.info("Добавлен датчик: id={}, hubId={}", sensorId, hubId);
+        log.info("Добавлен датчик: id={}, hubId={}, type={}",
+                sensorId, hubId, deviceType);
     }
 
     @Transactional

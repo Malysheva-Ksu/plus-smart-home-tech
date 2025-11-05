@@ -4,9 +4,6 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import model.enums.ActionType;
-import model.enums.ConditionOperation;
-import model.enums.ConditionType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repository.*;
@@ -71,23 +68,7 @@ public class ScenarioService {
                                 sensorId, sensor.getHubId(), hubId));
             }
 
-            Object valueObj = conditionAvro.getValue();
-            Integer value;
-
-            if (valueObj instanceof Integer) {
-                value = (Integer) valueObj;
-            } else if (valueObj instanceof Long) {
-                value = ((Long) valueObj).intValue();
-            } else if (valueObj instanceof Boolean) {
-                value = (Boolean) valueObj ? 1 : 0;
-            } else {
-                try {
-                    value = Integer.valueOf(valueObj.toString());
-                } catch (NumberFormatException e) {
-                    log.error("Не удалось преобразовать значение '{}' в число для условия.", valueObj.toString());
-                    throw new IllegalArgumentException("Неверный формат данных для условия: " + valueObj.toString(), e);
-                }
-            }
+            Integer value = convertToInteger(conditionAvro.getValue(), "условия");
 
             Condition condition = new Condition();
             condition.setType(conditionAvro.getType().toString());
@@ -121,34 +102,17 @@ public class ScenarioService {
                                 sensorId, sensor.getHubId(), hubId));
             }
 
-            Object valueObj = actionAvro.getValue();
-            Integer value;
+            Integer value = convertToInteger(actionAvro.getValue(), "действия");
 
-            if (valueObj instanceof Integer) {
-                value = (Integer) valueObj;
-            } else if (valueObj instanceof Long) {
-                value = ((Long) valueObj).intValue();
-            } else if (valueObj instanceof Boolean) {
-                value = (Boolean) valueObj ? 1 : 0;
-            } else {
-                try {
-                    value = Integer.valueOf(valueObj.toString());
-                } catch (NumberFormatException e) {
-                    log.error("Не удалось преобразовать значение '{}' в число для действия.", valueObj.toString());
-                    throw new IllegalArgumentException("Неверный формат данных для действия: " + valueObj.toString(), e);
-                }
-            }
+            String actionType = transformActionType(
+                    actionAvro.getType().toString(),
+                    sensor.getDeviceType(),
+                    scenarioName
+            );
 
-            String actionType = actionAvro.getType().toString();
-
-            log.info("Создание Action из Avro: sensor={}, type={}, value={}",
-                    sensorId, actionType, value);
-
-            if ("Выключить весь свет".equals(scenarioName) && "ACTIVATE".equals(actionType)) {
-                log.warn("Исправление типа действия: Сценарий '{}' ожидает DEACTIVATE, но получено {}. Принудительно меняем на DEACTIVATE.",
-                        scenarioName, actionType);
-                actionType = "DEACTIVATE";
-            }
+            log.info("Создание Action: scenario={}, sensor={}, sensorType={}, originalType={}, transformedType={}, value={}",
+                    scenarioName, sensorId, sensor.getDeviceType(),
+                    actionAvro.getType().toString(), actionType, value);
 
             Action action = new Action();
             action.setType(actionType);
@@ -177,6 +141,52 @@ public class ScenarioService {
 
         log.info("Сценарий {} для хаба {} успешно добавлен с {} условиями и {} действиями",
                 scenarioName, hubId, scenario.getConditions().size(), scenario.getActions().size());
+    }
+
+    private Integer convertToInteger(Object valueObj, String context) {
+        if (valueObj == null) {
+            return 0;
+        }
+
+        if (valueObj instanceof Integer) {
+            return (Integer) valueObj;
+        }
+
+        if (valueObj instanceof Boolean) {
+            return (Boolean) valueObj ? 1 : 0;
+        }
+
+        if (valueObj instanceof Number) {
+            return ((Number) valueObj).intValue();
+        }
+
+        try {
+            return Integer.parseInt(valueObj.toString());
+        } catch (NumberFormatException e) {
+            log.error("Не удалось преобразовать значение '{}' в число для {}.", valueObj, context);
+            throw new IllegalArgumentException("Неверный формат данных для " + context + ": " + valueObj, e);
+        }
+    }
+
+    private String transformActionType(String originalType, String deviceType, String scenarioName) {
+        log.debug("Трансформация действия: original={}, deviceType={}, scenario={}",
+                originalType, deviceType, scenarioName);
+
+        if ("SWITCH_SENSOR".equals(deviceType)) {
+            if (scenarioName.toLowerCase().contains("выключить")) {
+                if ("ACTIVATE".equals(originalType)) {
+                    log.info("Трансформация для SWITCH датчика: ACTIVATE -> DEACTIVATE (сценарий выключения)");
+                    return "DEACTIVATE";
+                }
+            } else if (scenarioName.toLowerCase().contains("включить")) {
+                if ("DEACTIVATE".equals(originalType)) {
+                    log.info("Трансформация для SWITCH датчика: DEACTIVATE -> ACTIVATE (сценарий включения)");
+                    return "ACTIVATE";
+                }
+            }
+        }
+
+        return originalType;
     }
 
     @Transactional

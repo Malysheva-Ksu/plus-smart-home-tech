@@ -59,6 +59,9 @@ CONSTRAINT fk_sa_action FOREIGN KEY (action_id)
 REFERENCES actions(id) ON DELETE CASCADE
 );
 @@
+ALTER TABLE sensors ADD COLUMN device_type VARCHAR(50);
+);
+@@
 CREATE OR REPLACE FUNCTION check_hub_id()
 RETURNS TRIGGER AS $$
 DECLARE
