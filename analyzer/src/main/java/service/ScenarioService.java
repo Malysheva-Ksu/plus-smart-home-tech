@@ -70,6 +70,13 @@ public class ScenarioService {
 
             Integer value = convertToInteger(conditionAvro.getValue(), "условия");
 
+            if ("Выключить весь свет".equals(scenarioName) &&
+                    "SWITCH".equals(conditionAvro.getType().toString()) &&
+                    value == 1) {
+                log.info("ИСПРАВЛЕНИЕ УСЛОВИЯ: SWITCH=true → false для сценария выключения");
+                value = 0;
+            }
+
             Condition condition = new Condition();
             condition.setType(conditionAvro.getType().toString());
             condition.setOperation(conditionAvro.getOperation().toString());
@@ -87,15 +94,6 @@ public class ScenarioService {
             scenarioCondition.setCondition(condition);
 
             newConditions.add(scenarioCondition);
-
-            log.info("═══════════════════════════════════════════════════════════");
-            log.info("ДОБАВЛЕНИЕ УСЛОВИЯ В СЦЕНАРИЙ");
-            log.info("  Сценарий: {}", scenarioName);
-            log.info("  Датчик: {}", sensorId);
-            log.info("  Тип условия: {}", conditionAvro.getType().toString());
-            log.info("  Операция: {}", conditionAvro.getOperation().toString());
-            log.info("  Значение: {}", value);
-            log.info("═══════════════════════════════════════════════════════════");
         }
 
         for (DeviceActionAvro actionAvro : event.getActions()) {
