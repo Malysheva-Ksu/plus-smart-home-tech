@@ -87,6 +87,15 @@ public class ScenarioService {
             scenarioCondition.setCondition(condition);
 
             newConditions.add(scenarioCondition);
+
+            log.info("═══════════════════════════════════════════════════════════");
+            log.info("ДОБАВЛЕНИЕ УСЛОВИЯ В СЦЕНАРИЙ");
+            log.info("  Сценарий: {}", scenarioName);
+            log.info("  Датчик: {}", sensorId);
+            log.info("  Тип условия: {}", conditionAvro.getType().toString());
+            log.info("  Операция: {}", conditionAvro.getOperation().toString());
+            log.info("  Значение: {}", value);
+            log.info("═══════════════════════════════════════════════════════════");
         }
 
         for (DeviceActionAvro actionAvro : event.getActions()) {
