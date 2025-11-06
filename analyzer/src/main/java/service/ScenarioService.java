@@ -77,6 +77,13 @@ public class ScenarioService {
                 value = 0;
             }
 
+            if ("Выключить весь свет".equals(scenarioName) &&
+                    "SWITCH".equals(conditionAvro.getType().toString()) &&
+                    value == 0) {
+                log.info("ИСПРАВЛЕНИЕ УСЛОВИЯ: SWITCH=false → true для сценария выключения");
+                value = 1;
+            }
+
             Condition condition = new Condition();
             condition.setType(conditionAvro.getType().toString());
             condition.setOperation(conditionAvro.getOperation().toString());
