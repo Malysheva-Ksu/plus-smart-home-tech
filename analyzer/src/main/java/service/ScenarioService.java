@@ -70,18 +70,6 @@ public class ScenarioService {
 
             Integer value = convertToInteger(conditionAvro.getValue(), "условия");
 
-            if ("Выключить весь свет".equals(scenarioName) &&
-                    "SWITCH".equals(conditionAvro.getType().toString()) &&
-                    value == 1) {
-                log.info("ИСПРАВЛЕНИЕ УСЛОВИЯ: SWITCH=true → false для сценария выключения");
-                value = 0;
-            } else if ("Выключить весь свет".equals(scenarioName) &&
-                    "SWITCH".equals(conditionAvro.getType().toString()) &&
-                    value == 0) {
-                log.info("ИСПРАВЛЕНИЕ УСЛОВИЯ: SWITCH=false → true для сценария выключения");
-                value = 1;
-            }
-
             Condition condition = new Condition();
             condition.setType(conditionAvro.getType().toString());
             condition.setOperation(conditionAvro.getOperation().toString());

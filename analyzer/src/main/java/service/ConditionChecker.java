@@ -25,6 +25,12 @@ public class ConditionChecker {
             String sensorId = scenarioCondition.getSensor().getId();
             Condition condition = scenarioCondition.getCondition();
 
+            log.info("  Проверка условия для датчика: {}", sensorId);
+            log.info("    Тип условия: {}", condition.getType());
+            log.info("    Операция: {}", condition.getOperation());
+            log.info("    Ожидаемое значение: {}", condition.getValue());
+
+
             if (sensorsState == null) {
                 log.debug("Snapshot.sensorsState == null для хаба {}", snapshot.getHubId());
                 return false;
