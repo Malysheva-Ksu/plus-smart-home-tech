@@ -169,44 +169,19 @@ public class ScenarioService {
     }
 
     private String transformActionType(String originalType, String deviceType, String scenarioName) {
-        log.debug("Трансформация для hub-router: original={}, deviceType={}, scenario={}",
+        log.debug("Трансформация действия: original={}, deviceType={}, scenario={}",
                 originalType, deviceType, scenarioName);
 
         if ("SWITCH_SENSOR".equals(deviceType)) {
             if (scenarioName.toLowerCase().contains("выключить")) {
-                if ("DEACTIVATE".equals(originalType)) {
-                    log.info("Трансформация: DEACTIVATE -> 'turn_off' для hub-router");
-                    return "turn_off";
-                }
+                log.info("Для сценария 'выключить' используем: DEACTIVATE");
+                return "DEACTIVATE";
             } else if (scenarioName.toLowerCase().contains("включить")) {
-                if ("ACTIVATE".equals(originalType)) {
-                    log.info("Трансформация: ACTIVATE -> 'turn_on' для hub-router");
-                    return "turn_on";
-                }
+                log.info("Для сценария 'включить' используем: ACTIVATE");
+                return "ACTIVATE";
             }
         }
 
-        return tryDifferentFormats(originalType, scenarioName);
-    }
-
-    private String tryDifferentFormats(String originalType, String scenarioName) {
-        Map<String, String> formatVariants = Map.of(
-                "DEACTIVATE", "DEACTIVATE",
-                "deactivate", "deactivate",
-                "turn_off", "turn_off",
-                "off", "off",
-                "false", "false",
-                "0", "0"
-        );
-
-        String result = formatVariants.get(originalType);
-        if (result != null) {
-            log.info("Используем формат: '{}' -> '{}' для сценария '{}'",
-                    originalType, result, scenarioName);
-            return result;
-        }
-
-        log.warn("Неизвестный тип действия: '{}', используем как есть", originalType);
         return originalType;
     }
 
