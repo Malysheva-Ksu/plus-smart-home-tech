@@ -146,6 +146,7 @@ public class ScenarioService {
     private Integer convertToInteger(Object valueObj, String context) {
         if (valueObj == null) {
             if ("действия".equals(context)) {
+                log.debug("Используем значение по умолчанию 1 для {}", context);
                 return 1;
             }
             return 0;
@@ -167,16 +168,30 @@ public class ScenarioService {
             return Integer.parseInt(valueObj.toString());
         } catch (NumberFormatException e) {
             log.error("Не удалось преобразовать значение '{}' в число для {}.", valueObj, context);
+
+            if ("действия".equals(context)) {
+                log.warn("Используем значение по умолчанию 1 для действия");
+                return 1;
+            }
+
             throw new IllegalArgumentException("Неверный формат данных для " + context + ": " + valueObj, e);
         }
     }
 
     private String transformActionType(String originalType, String deviceType, String scenarioName) {
+        log.debug("Трансформация действия: original={}, deviceType={}, scenario={}",
+                originalType, deviceType, scenarioName);
+
         if ("SWITCH_SENSOR".equals(deviceType)) {
             if (scenarioName.toLowerCase().contains("выключить")) {
+                log.info("Для сценария 'выключить' используем: DEACTIVATE");
+                return "DEACTIVATE";
+            } else if (scenarioName.toLowerCase().contains("включить")) {
+                log.info("Для сценария 'включить' используем: ACTIVATE");
                 return "ACTIVATE";
             }
         }
+
         return originalType;
     }
 
