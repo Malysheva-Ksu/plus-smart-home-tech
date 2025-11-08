@@ -23,11 +23,14 @@ public class KafkaCleanupConfig {
         try {
             log.info("Очистка Kafka топика telemetry.actions.v1...");
 
-            kafkaAdminClient.deleteTopics(Collections.singletonList("telemetry.actions.v1"))
-                    .all()
-                    .get(10, TimeUnit.SECONDS);
-
-            Thread.sleep(2000);
+            try {
+                kafkaAdminClient.deleteTopics(Collections.singletonList("telemetry.actions.v1"))
+                        .all()
+                        .get(10, TimeUnit.SECONDS);
+                Thread.sleep(2000);
+            } catch (Exception e) {
+                log.info("Топик telemetry.actions.v1 не существует или уже удален");
+            }
 
             NewTopic newTopic = new NewTopic("telemetry.actions.v1", 1, (short) 1);
             kafkaAdminClient.createTopics(Collections.singletonList(newTopic))
