@@ -25,7 +25,7 @@ public class SensorService {
         }
 
         Sensor sensor = new Sensor(sensorId, hubId);
-        sensor.setDeviceType(deviceType); // ← Сохраняем тип
+        sensor.setDeviceType(deviceType);
         sensorRepository.save(sensor);
         log.info("Добавлен датчик: id={}, hubId={}, type={}",
                 sensorId, hubId, deviceType);

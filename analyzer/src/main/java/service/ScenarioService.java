@@ -115,12 +115,8 @@ public class ScenarioService {
                     actionAvro.getType().toString(), actionType, value);
 
             Action action = new Action();
-            action.setType(actionType);
+            action.setType(actionType.toString());
             action.setValue(value);
-
-            if (actionType.equals("DEACTIVATE")) {
-                action.setType("DEACTIVATE");
-            }
 
             action = actionRepository.save(action);
 

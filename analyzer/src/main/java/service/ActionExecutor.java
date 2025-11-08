@@ -59,7 +59,7 @@ public class ActionExecutor {
         HubRouterControllerProto.DeviceActionProto actionProto =
                 HubRouterControllerProto.DeviceActionProto.newBuilder()
                         .setSensorId(sensorId)
-                        .setType(normalizedType)
+                        .setType(normalizedType.toString())
                         .setValue(action.getValue())
                         .build();
 

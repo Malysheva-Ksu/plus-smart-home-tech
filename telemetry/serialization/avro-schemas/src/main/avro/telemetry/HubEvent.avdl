@@ -27,7 +27,7 @@ DEVICE_REMOVED
 
     record DeviceActionAvro {
         string sensor_id;
-        string type;
+        ActionTypeAvro type;
         union { null, int } value = null;
     }
 
