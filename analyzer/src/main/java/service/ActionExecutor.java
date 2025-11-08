@@ -48,7 +48,7 @@ public class ActionExecutor {
         log.info("  Длина строки: {}", actionTypeToSend.length());
         log.info("═══════════════════════════════════════════════════════════");
 
-        String normalizedType = normalizeActionType(actionTypeToSend);
+        HubRouterControllerProto.ActionTypeProto actionTypeProto = convertToProtoActionType(actionTypeToSend);
 
         Instant now = Instant.now();
         Timestamp timestamp = Timestamp.newBuilder()
@@ -59,7 +59,7 @@ public class ActionExecutor {
         HubRouterControllerProto.DeviceActionProto actionProto =
                 HubRouterControllerProto.DeviceActionProto.newBuilder()
                         .setSensorId(sensorId)
-                        .setType(normalizedType.toString())
+                        .setType(actionTypeProto)
                         .setValue(action.getValue())
                         .build();
 
@@ -71,26 +71,26 @@ public class ActionExecutor {
                         .setTimestamp(timestamp)
                         .build();
 
-        log.info("Отправка команды: hub={}, scenario={}, sensor={}, normalizedType={}",
-                hubId, scenarioName, sensorId, normalizedType);
+        log.info("Отправка команды: hub={}, scenario={}, sensor={}, actionType={}",
+                hubId, scenarioName, sensorId, actionTypeProto);
 
         hubRouterClient.handleDeviceAction(request);
 
         log.info("Команда успешно отправлена");
     }
 
-    private String normalizeActionType(String actionType) {
-        if (actionType == null) return "DEACTIVATE";
+    private HubRouterControllerProto.ActionTypeProto convertToProtoActionType(String actionType) {
+        if (actionType == null) {
+            return HubRouterControllerProto.ActionTypeProto.DEACTIVATE;
+        }
 
         String trimmed = actionType.trim().toUpperCase();
 
-        if ("ACTIVATE".equals(trimmed) || "DEACTIVATE".equals(trimmed) ||
-                "INVERSE".equals(trimmed) || "SET_VALUE".equals(trimmed)) {
-            log.info("Нормализация: '{}' -> '{}'", actionType, trimmed);
-            return trimmed;
+        try {
+            return HubRouterControllerProto.ActionTypeProto.valueOf(trimmed);
+        } catch (IllegalArgumentException e) {
+            log.warn("Неизвестный тип действия: '{}', используем DEACTIVATE", actionType);
+            return HubRouterControllerProto.ActionTypeProto.DEACTIVATE;
         }
-
-        log.warn("Неизвестный тип действия: '{}', используем DEACTIVATE", actionType);
-        return "DEACTIVATE";
     }
 }

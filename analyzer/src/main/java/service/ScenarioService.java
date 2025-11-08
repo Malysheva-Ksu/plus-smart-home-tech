@@ -7,6 +7,7 @@ import model.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repository.*;
+import ru.yandex.practicum.grpc.telemetry.hubrouter.HubRouterControllerProto;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
@@ -193,7 +194,15 @@ public class ScenarioService {
             }
         }
 
-        return originalType;
+        String result = originalType;
+        try {
+            HubRouterControllerProto.ActionTypeProto.valueOf(result.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Некорректный тип действия '{}', используем DEACTIVATE", result);
+            result = "DEACTIVATE";
+        }
+
+        return result;
     }
 
     @Transactional

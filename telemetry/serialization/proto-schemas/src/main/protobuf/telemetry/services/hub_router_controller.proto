@@ -8,6 +8,13 @@ import "google/protobuf/timestamp.proto";
 option java_package = "ru.yandex.practicum.grpc.telemetry.hubrouter";
 option java_outer_classname = "HubRouterControllerProto";
 
+enum ActionTypeProto {
+  ACTIVATE = 0;
+  DEACTIVATE = 1;
+  INVERSE = 2;
+  SET_VALUE = 3;
+}
+
 service HubRouterController {
   rpc handleDeviceAction (DeviceActionRequest) returns (google.protobuf.Empty);
 }
@@ -21,6 +28,6 @@ message DeviceActionRequest {
 
 message DeviceActionProto {
   string sensor_id = 1;
-  string type = 2;
+  ActionTypeProto type = 2;
   int32 value = 3;
 }
