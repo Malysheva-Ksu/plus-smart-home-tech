@@ -19,28 +19,36 @@ public class KafkaCleanupConfig {
     private final AdminClient kafkaAdminClient;
 
     @EventListener(ApplicationReadyEvent.class)
-    public void cleanKafkaOnStartup() {
+    public void cleanAllKafkaTopics() {
         try {
-            log.info("Очистка Kafka топика telemetry.actions.v1...");
+            String[] topicsToClean = {
+                    "telemetry.actions.v1",
+                    "telemetry.sensors.v1",
+                    "telemetry.snapshots.v1",
+                    "telemetry.hubs.v1"
+            };
 
-            try {
-                kafkaAdminClient.deleteTopics(Collections.singletonList("telemetry.actions.v1"))
-                        .all()
-                        .get(10, TimeUnit.SECONDS);
-                Thread.sleep(2000);
-            } catch (Exception e) {
-                log.info("Топик telemetry.actions.v1 не существует или уже удален");
+            for (String topic : topicsToClean) {
+                try {
+                    kafkaAdminClient.deleteTopics(Collections.singletonList(topic))
+                            .all()
+                            .get(10, TimeUnit.SECONDS);
+                    Thread.sleep(1000);
+
+                    NewTopic newTopic = new NewTopic(topic, 1, (short) 1);
+                    kafkaAdminClient.createTopics(Collections.singletonList(newTopic))
+                            .all()
+                            .get(10, TimeUnit.SECONDS);
+
+                    log.info("Очищен и пересоздан топик: {}", topic);
+
+                } catch (Exception e) {
+                    log.info("Топик {} не существует: {}", topic, e.getMessage());
+                }
             }
 
-            NewTopic newTopic = new NewTopic("telemetry.actions.v1", 1, (short) 1);
-            kafkaAdminClient.createTopics(Collections.singletonList(newTopic))
-                    .all()
-                    .get(10, TimeUnit.SECONDS);
-
-            log.info("Kafka топик telemetry.actions.v1 очищен и пересоздан");
-
         } catch (Exception e) {
-            log.warn("Не удалось очистить Kafka топик: {}", e.getMessage());
+            log.warn("Ошибка очистки Kafka: {}", e.getMessage());
         }
     }
 }
