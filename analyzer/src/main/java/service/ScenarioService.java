@@ -145,6 +145,9 @@ public class ScenarioService {
 
     private Integer convertToInteger(Object valueObj, String context) {
         if (valueObj == null) {
+            if ("действия".equals(context)) {
+                return 1;
+            }
             return 0;
         }
 
