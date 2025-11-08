@@ -42,18 +42,26 @@ public class ActionExecutor {
     private void executeAction(String hubId, String scenarioName, String sensorId, Action action) {
         String actionTypeToSend = action.getType();
 
-        HubRouterControllerProto.DeviceActionProto actionProto =
-                HubRouterControllerProto.DeviceActionProto.newBuilder()
-                        .setSensorId(sensorId)
-                        .setType(actionTypeToSend)
-                        .setValue(action.getValue())
-                        .build();
+        log.info("═══════════════════════════════════════════════════════════");
+        log.info("ДИАГНОСТИКА - ОТПРАВКА В HUB-ROUTER:");
+        log.info("  actionType из БД: '{}'", actionTypeToSend);
+        log.info("  Длина строки: {}", actionTypeToSend.length());
+        log.info("═══════════════════════════════════════════════════════════");
+
+        String normalizedType = normalizeActionType(actionTypeToSend);
 
         Instant now = Instant.now();
         Timestamp timestamp = Timestamp.newBuilder()
                 .setSeconds(now.getEpochSecond())
                 .setNanos(now.getNano())
                 .build();
+
+        HubRouterControllerProto.DeviceActionProto actionProto =
+                HubRouterControllerProto.DeviceActionProto.newBuilder()
+                        .setSensorId(sensorId)
+                        .setType(normalizedType)
+                        .setValue(action.getValue())
+                        .build();
 
         HubRouterControllerProto.DeviceActionRequest request =
                 HubRouterControllerProto.DeviceActionRequest.newBuilder()
@@ -63,11 +71,26 @@ public class ActionExecutor {
                         .setTimestamp(timestamp)
                         .build();
 
-        log.info("Отправка команды: hub={}, scenario={}, sensor={}, type={}",
-                hubId, scenarioName, sensorId, actionTypeToSend);
+        log.info("Отправка команды: hub={}, scenario={}, sensor={}, normalizedType={}",
+                hubId, scenarioName, sensorId, normalizedType);
 
         hubRouterClient.handleDeviceAction(request);
 
         log.info("Команда успешно отправлена");
+    }
+
+    private String normalizeActionType(String actionType) {
+        if (actionType == null) return "ACTIVATE";
+
+        String trimmed = actionType.trim().toUpperCase();
+
+        if ("ACTIVATE".equals(trimmed) || "DEACTIVATE".equals(trimmed) ||
+                "INVERSE".equals(trimmed) || "SET_VALUE".equals(trimmed)) {
+            log.info("Нормализация: '{}' -> '{}'", actionType, trimmed);
+            return trimmed;
+        }
+
+        log.warn("Неизвестный тип действия: '{}', используем ACTIVATE", actionType);
+        return "ACTIVATE";
     }
 }
