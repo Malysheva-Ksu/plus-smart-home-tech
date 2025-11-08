@@ -80,7 +80,7 @@ public class ActionExecutor {
     }
 
     private String normalizeActionType(String actionType) {
-        if (actionType == null) return "ACTIVATE";
+        if (actionType == null) return "DEACTIVATE";
 
         String trimmed = actionType.trim().toUpperCase();
 
