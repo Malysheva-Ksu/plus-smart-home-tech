@@ -17,7 +17,8 @@ CONSTRAINT uq_scenario_hub_name UNIQUE(hub_id, name)
 @@
 CREATE TABLE sensors (
 id VARCHAR(255) PRIMARY KEY,
-hub_id VARCHAR(255) NOT NULL
+hub_id VARCHAR(255) NOT NULL,
+device_type VARCHAR(50)
 );
 @@
 CREATE TABLE conditions (
@@ -58,8 +59,6 @@ REFERENCES sensors(id) ON DELETE CASCADE,
 CONSTRAINT fk_sa_action FOREIGN KEY (action_id)
 REFERENCES actions(id) ON DELETE CASCADE
 );
-@@
-ALTER TABLE sensors ADD COLUMN device_type VARCHAR(50);
 @@
 CREATE OR REPLACE FUNCTION check_hub_id()
 RETURNS TRIGGER AS $$
