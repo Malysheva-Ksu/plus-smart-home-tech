@@ -117,6 +117,12 @@ public class ScenarioService {
             Action action = new Action();
             action.setType(actionType);
             action.setValue(value);
+
+            if (actionType.equals("DEACTIVATE")) {
+                log.info("=====Value изменен на 1=====");
+                action.setValue(1);
+            }
+            
             action = actionRepository.save(action);
 
             log.info("Action сохранён в БД: id={}, type={}, value={}",
