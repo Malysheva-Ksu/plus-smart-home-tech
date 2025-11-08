@@ -90,7 +90,7 @@ public class ActionExecutor {
             return trimmed;
         }
 
-        log.warn("Неизвестный тип действия: '{}', используем ACTIVATE", actionType);
-        return "ACTIVATE";
+        log.warn("Неизвестный тип действия: '{}', используем DEACTIVATE", actionType);
+        return "DEACTIVATE";
     }
 }
