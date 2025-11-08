@@ -156,7 +156,7 @@ public class HubEventProcessor implements Runnable {
 
                 DeviceActionAvro correctedAction = DeviceActionAvro.newBuilder()
                         .setSensorId(action.getSensorId())
-                        .setType(ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro.DEACTIVATE)
+                        .setType("DEACTIVATE")
                         .setValue(action.getValue())
                         .build();
 

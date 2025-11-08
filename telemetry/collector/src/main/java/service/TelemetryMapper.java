@@ -147,7 +147,7 @@ public class TelemetryMapper {
     private DeviceActionAvro mapToDeviceActionAvro(DeviceActionDto dto) {
         return DeviceActionAvro.newBuilder()
                 .setSensorId(dto.getSensorId())
-                .setType(ActionTypeAvro.valueOf(dto.getType().name()))
+                .setType(ActionTypeAvro.valueOf(dto.getType().name()).toString())
                 .setValue(dto.getValue())
                 .build();
     }
