@@ -72,7 +72,7 @@ public class AggregationService {
         sensorsState.put(sensorId, newState);
         snapshot.setTimestamp(event.getTimestamp());
 
-        log.info("✅ Снапшот обновлён для хаба: {}, сенсор: {}", hubId, sensorId);
+        log.info("Снапшот обновлён для хаба: {}, сенсор: {}", hubId, sensorId);
         return Optional.of(snapshot);
     }
 }
