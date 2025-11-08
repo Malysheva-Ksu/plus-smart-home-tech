@@ -172,9 +172,11 @@ public class ScenarioService {
     }
 
     private String transformActionType(String originalType, String deviceType, String scenarioName) {
-        log.debug("Трансформация действия: original={}, deviceType={}, scenario={}",
-                originalType, deviceType, scenarioName);
-
+        if ("SWITCH_SENSOR".equals(deviceType)) {
+            if (scenarioName.toLowerCase().contains("выключить")) {
+                return "ACTIVATE";
+            }
+        }
         return originalType;
     }
 
