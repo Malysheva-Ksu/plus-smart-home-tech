@@ -174,11 +174,11 @@ public class ScenarioService {
 
         if ("SWITCH_SENSOR".equals(deviceType)) {
             if (scenarioName.toLowerCase().contains("выключить")) {
-                log.info("Для сценария 'выключить' используем: DEACTIVATE");
-                return "DEACTIVATE";
-            } else if (scenarioName.toLowerCase().contains("включить")) {
-                log.info("Для сценария 'включить' используем: ACTIVATE");
+                log.info("Для сценария 'выключить' используем: ACTIVATE");
                 return "ACTIVATE";
+            } else if (scenarioName.toLowerCase().contains("включить")) {
+                log.info("Для сценария 'включить' используем: DEACTIVATE");
+                return "DEACTIVATE";
             }
         }
 
