@@ -15,6 +15,14 @@ kafka:
     hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
     snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
 
+    grpc:
+      client:
+        echo:
+          address: 'static://127.0.0.1:9090'
+          enableKeepAlive: true
+          keepAliveWithoutCalls: true
+          negotiationType: plaintext
+
 logging:
   level:
     ru.yandex.practicum: DEBUG

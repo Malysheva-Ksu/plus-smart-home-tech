@@ -1,116 +1,15 @@
 syntax = "proto3";
 
-package telemetry.service.controller;
+package telemetry.service.collector;
 
-option java_package = "ru.yandex.practicum.grpc.telemetry.controller";
-option java_outer_classname = "CollectorProto";
+import "google/protobuf/empty.proto";
+import "telemetry/messages/hub_event.proto";
+import "telemetry/messages/sensor_event.proto";
 
-enum SensorTypeProto {
-  UNKNOWN_SENSOR_TYPE = 0;
-  LIGHT = 1;
-  TEMPERATURE = 2;
-  SWITCH = 3;
-  CLIMATE = 4;
-  MOTION = 5;
-}
+option java_package = "ru.yandex.practicum.grpc.telemetry.collector";
+option java_outer_classname = "CollectorServiceProto";
 
-enum SmartSwitchStateProto {
-  UNKNOWN_SWITCH_STATE = 0;
-  ON = 1;
-  OFF = 2;
-}
-
-message SensorRegisteredEventProto {
-  string hubId = 1;
-  int64 timestamp = 2;
-  string sensorId = 3;
-  SensorTypeProto sensorType = 4;
-}
-
-message SensorDeregisteredEventProto {
-  string hubId = 1;
-  int64 timestamp = 2;
-  string sensorId = 3;
-}
-
-message ScenarioAddedEventProto {
-  string hubId = 1;
-  int64 timestamp = 2;
-  string scenarioId = 3;
-  string scenarioName = 4;
-}
-
-message ScenarioRemovedEventProto {
-  string hubId = 1;
-  int64 timestamp = 2;
-  string scenarioId = 3;
-}
-
-message LightSensorEventProto {
-  string id = 1;
-  string hubId = 2;
-  int64 timestamp = 3;
-  int32 linkQuality = 4;
-  int32 luminosity = 5;
-}
-
-message TemperatureSensorEventProto {
-  string id = 1;
-  string hubId = 2;
-  int64 timestamp = 3;
-  int32 linkQuality = 4;
-  float temperature = 5;
-}
-
-message SmartSwitchEventProto {
-  string id = 1;
-  string hubId = 2;
-  int64 timestamp = 3;
-  int32 linkQuality = 4;
-  SmartSwitchStateProto state = 5;
-}
-
-message ClimateSensorEventProto {
-  string id = 1;
-  string hubId = 2;
-  int64 timestamp = 3;
-  int32 linkQuality = 4;
-  float temperature = 5;
-  float humidity = 6;
-}
-
-message MotionSensorEventProto {
-  string id = 1;
-  string hubId = 2;
-  int64 timestamp = 3;
-  int32 linkQuality = 4;
-}
-
-message HubEventRequest {
-  oneof event {
-    SensorRegisteredEventProto sensorRegisteredEvent = 1;
-    SensorDeregisteredEventProto sensorDeregisteredEvent = 2;
-    ScenarioAddedEventProto scenarioAddedEvent = 3;
-    ScenarioRemovedEventProto scenarioRemovedEvent = 4;
-  }
-}
-
-message SensorEventRequest {
-  oneof event {
-    LightSensorEventProto lightSensorEvent = 1;
-    TemperatureSensorEventProto temperatureSensorEvent = 2;
-    SmartSwitchEventProto smartSwitchEvent = 3;
-    ClimateSensorEventProto climateSensorEvent = 4;
-    MotionSensorEventProto motionSensorEvent = 5;
-  }
-}
-
-message ReceiveResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-service CollectorService {
-  rpc ReceiveHubEvent (HubEventRequest) returns (ReceiveResponse);
-  rpc ReceiveSensorData (SensorEventRequest) returns (ReceiveResponse);
+service CollectorController {
+  rpc CollectHubEvent (telemetry.message.event.HubEventProto) returns (google.protobuf.Empty);
+  rpc CollectSensorEvent (telemetry.message.event.SensorEventProto) returns (google.protobuf.Empty);
 }

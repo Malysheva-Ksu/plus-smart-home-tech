@@ -14,6 +14,11 @@
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
         </dependency>
 
@@ -32,14 +37,11 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.23.4</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-            <version>3.23.4</version>
         </dependency>
     </dependencies>
 
@@ -81,7 +83,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <protocVersion>3.23.4</protocVersion>
+                            <protocVersion>${protobuf.version}</protocVersion>
                         </configuration>
                     </execution>
                 </executions>

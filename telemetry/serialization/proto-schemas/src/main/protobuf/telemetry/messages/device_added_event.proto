@@ -1,0 +1,11 @@
+syntax = "proto3";
+import "telemetry/messages/device_type.proto";
+package telemetry.message.event;
+
+option java_multiple_files = true;
+option java_package = "ru.yandex.practicum.grpc.telemetry.event";
+
+message DeviceAddedEventProto {
+  string id = 1;
+  DeviceTypeProto type = 2;
+}
