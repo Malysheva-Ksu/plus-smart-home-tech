@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations:
+            - classpath:config/telemetry/aggregator
+            - classpath:config/telemetry/analyzer
+            - classpath:config/telemetry/collector
