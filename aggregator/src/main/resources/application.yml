@@ -5,7 +5,19 @@ spring:
     import: configserver:http://localhost:8888
 cloud:
   config:
+    discovery:
+      enabled: true
+      serviceId: config-server
     fail-fast: true
     retry:
       useRandomPolicy: true
       max-interval: 6000
+
+eureka:
+  client:
+    registerWithEureka: false
+  instance:
+    preferIpAddress: false
+    hostname: external.host
+  serviceUrl:
+    defaultZone: http://localhost:8761/eureka/

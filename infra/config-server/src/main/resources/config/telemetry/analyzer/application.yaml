@@ -1,6 +1,11 @@
 spring:
   application:
     name: analyzer-service
+  cloud:
+    config:
+      discovery:
+      enabled: true
+      serviceId: config-server
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/analyzer}
@@ -58,3 +63,12 @@ logging:
     processor: DEBUG
     org.apache.kafka: INFO
     org.hibernate.SQL: DEBUG
+
+eureka:
+  client:
+    registerWithEureka: false
+  instance:
+    preferIpAddress: false
+    hostname: external.host
+  serviceUrl:
+    defaultZone: http://localhost:8761/eureka/
