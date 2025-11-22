@@ -1,3 +1,6 @@
+server:
+  port: 0
+
 spring:
   application:
     name: config-server
@@ -11,3 +14,10 @@ spring:
             - classpath:config/telemetry/aggregator
             - classpath:config/telemetry/analyzer
             - classpath:config/telemetry/collector
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    instance-id: ${spring.application.name}:${random.value}

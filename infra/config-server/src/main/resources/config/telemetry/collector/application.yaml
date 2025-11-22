@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: collector-service
+  cloud:
+    config:
+      discovery:
+      enabled: true
+      serviceId: config-server
 
 kafka:
   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
@@ -28,3 +33,12 @@ logging:
     ru.yandex.practicum: DEBUG
     kafkaConfig: DEBUG
     org.apache.kafka: INFO
+
+eureka:
+  client:
+    registerWithEureka: false
+  instance:
+    preferIpAddress: false
+    hostname: external.host
+  serviceUrl:
+    defaultZone: http://localhost:8761/eureka/
