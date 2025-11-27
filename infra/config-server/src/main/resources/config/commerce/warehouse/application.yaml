@@ -1,0 +1,91 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: warehouse-service
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        serviceId: config-server
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/warehouse}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      client-id: warehouse-service-producer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+
+    consumer:
+      group-id: warehouse-events-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+    topics:
+      stock-updates: ${KAFKA_TOPIC_STOCK_UPDATES:warehouse.stock.updates.v1}
+
+logging:
+  level:
+    root: INFO
+    ru.yandex.practicum: DEBUG
+    service: DEBUG
+    repository: DEBUG
+    controller: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.apache.kafka: INFO
+    org.springframework.cloud.client.circuitbreaker: DEBUG
+
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+    hostname: localhost
+    instance-id: "${spring.application.name}:${random.value}"
+    leaseRenewalIntervalInSeconds: 10
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 50
+      failureRateThreshold: 50
+      waitDurationInOpenState: 5s
+      permittedNumberOfCallsInHalfOpenState: 10
+      recordExceptions:
+        - exception.StockNotFoundException
+        - exception.StockReservationException
+        - exception.InsufficientStockException
+    stockService:
+      slidingWindowSize: 50
+      failureRateThreshold: 50
+      waitDurationInOpenState: 5s
+      permittedNumberOfCallsInHalfOpenState: 10
+      recordExceptions:
+        - exception.StockNotFoundException
+    reserveStock:
+      slidingWindowSize: 50
+      failureRateThreshold: 50
+      waitDurationInOpenState: 5s
+      permittedNumberOfCallsInHalfOpenState: 10
+      recordExceptions:
+        - exception.StockReservationException
+        - exception.InsufficientStockException
