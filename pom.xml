@@ -26,6 +26,7 @@
         <module>aggregator</module>
         <module>analyzer</module>
         <module>infra/config-server</module>
+        <module>infra/discovery-server</module>
         <module>commerce/interaction</module>
         <module>commerce/shopping-cart</module>
         <module>commerce/shopping-store</module>
