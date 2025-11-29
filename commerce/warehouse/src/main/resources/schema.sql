@@ -7,6 +7,8 @@ CREATE TABLE warehouse.stock_items (
     quantity INTEGER NOT NULL DEFAULT 0,
     reserved INTEGER NOT NULL DEFAULT 0,
     last_stock_update TIMESTAMP DEFAULT NOW()
+    min_stock_level INTEGER NOT NULL DEFAULT 0,
+    max_stock_level INTEGER
 );
 
 CREATE TABLE warehouse.stock_movements (
@@ -15,5 +17,6 @@ CREATE TABLE warehouse.stock_movements (
     movement_type VARCHAR(20) NOT NULL, -- IN, OUT, RESERVE, RELEASE
     quantity INTEGER NOT NULL,
     reference VARCHAR(100), -- order_id, etc.
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    description VARCHAR(500)
 );
