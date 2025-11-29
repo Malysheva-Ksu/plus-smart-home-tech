@@ -4,11 +4,6 @@ server:
 spring:
   application:
     name: warehouse-service
-  cloud:
-    config:
-      discovery:
-        enabled: true
-        serviceId: config-server
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/warehouse}
