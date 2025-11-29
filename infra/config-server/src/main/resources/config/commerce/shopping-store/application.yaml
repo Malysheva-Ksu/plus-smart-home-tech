@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -40,7 +40,7 @@ grpc:
   client:
 
     warehouse-service:
-      address: 'static://localhost:8083'
+      address: 'eureka:warehouse-service'
       enableKeepAlive: true
       keepAliveWithoutCalls: true
       negotiationType: plaintext
