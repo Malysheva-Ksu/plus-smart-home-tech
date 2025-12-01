@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: warehouse-service
+    name: warehouse
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/warehouse}
