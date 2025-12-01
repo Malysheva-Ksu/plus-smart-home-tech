@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableFeignClients
 @ConfigurationPropertiesScan
-@ComponentScan(basePackages = {"controller", "model", "repository", "service"})
+@ComponentScan(basePackages = {"controller", "model", "repository", "service", "config"})
 @EnableJpaRepositories(basePackages = "repository")
 @EntityScan(basePackageClasses = {StockItem.class, ReserveRequest.class, StockMovement.class, StockUpdateRequest.class})
 public class Warehouse {
