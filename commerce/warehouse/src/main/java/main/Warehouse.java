@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ConfigurationPropertiesScan
 @ComponentScan(basePackages = {"controller", "model", "repository", "service"})
 @EnableJpaRepositories(basePackages = "repository")
+@EntityScan(basePackages = "model")
 public class Warehouse {
     public static void main(String[] args) {
         SpringApplication.run(Warehouse.class, args);
