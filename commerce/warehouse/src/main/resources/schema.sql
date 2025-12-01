@@ -1,12 +1,15 @@
-DROP TABLE IF EXISTS warehouse.stock_items CASCADE;
+-- Удаление существующих таблиц
 DROP TABLE IF EXISTS warehouse.stock_movements CASCADE;
+DROP TABLE IF EXISTS warehouse.stock_items CASCADE;
+
+CREATE SCHEMA IF NOT EXISTS warehouse;
 
 CREATE TABLE warehouse.stock_items (
     id BIGSERIAL PRIMARY KEY,
     product_id BIGINT NOT NULL UNIQUE,
     quantity INTEGER NOT NULL DEFAULT 0,
     reserved INTEGER NOT NULL DEFAULT 0,
-    last_stock_update TIMESTAMP DEFAULT NOW()
+    last_stock_update TIMESTAMP DEFAULT NOW(),
     min_stock_level INTEGER NOT NULL DEFAULT 0,
     max_stock_level INTEGER
 );
@@ -14,9 +17,25 @@ CREATE TABLE warehouse.stock_items (
 CREATE TABLE warehouse.stock_movements (
     id BIGSERIAL PRIMARY KEY,
     product_id BIGINT NOT NULL,
-    movement_type VARCHAR(20) NOT NULL, -- IN, OUT, RESERVE, RELEASE
+    movement_type VARCHAR(20) NOT NULL,
     quantity INTEGER NOT NULL,
-    reference VARCHAR(100), -- order_id, etc.
+    reference VARCHAR(100),
     created_at TIMESTAMP DEFAULT NOW(),
-    description VARCHAR(500)
+    description VARCHAR(500),
+    CONSTRAINT fk_stock_items 
+        FOREIGN KEY (product_id) 
+        REFERENCES warehouse.stock_items(product_id)
+        ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_stock_items_product_id 
+    ON warehouse.stock_items(product_id);
+
+CREATE INDEX IF NOT EXISTS idx_stock_movements_product_id 
+    ON warehouse.stock_movements(product_id);
+
+CREATE INDEX IF NOT EXISTS idx_stock_movements_type 
+    ON warehouse.stock_movements(movement_type);
+
+CREATE INDEX IF NOT EXISTS idx_stock_movements_created 
+    ON warehouse.stock_movements(created_at);
