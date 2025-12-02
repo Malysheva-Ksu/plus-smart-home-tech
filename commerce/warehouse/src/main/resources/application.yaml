@@ -1,8 +1,6 @@
 spring:
   application:
     name: warehouse
-  config:
-    import: "configserver:"
   cloud:
     config:
       discovery:
