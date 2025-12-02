@@ -9,11 +9,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableFeignClients
 @ConfigurationPropertiesScan
-@ComponentScan(basePackages = {"controller", "repository", "service", "main"})
+@ComponentScan(basePackages = {"controller", "repository", "service", "main", "client"})
 @EnableJpaRepositories(basePackages = "repository")
 @EntityScan(basePackages = "model.shoppingCart")
+@EnableFeignClients(basePackages = "client")
 public class ShoppingCartApplication {
     public static void main(String[] args) {
         SpringApplication.run(ShoppingCartApplication.class, args);

@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 import java.util.List;
 
-@FeignClient(name = "shopping-store-service", path = "/api/v1/shopping-store")
+@FeignClient(name = "shopping-store", path = "/api/v1/shopping-store")
 public interface ProductServiceClient {
 
     @GetMapping("/{id}")
