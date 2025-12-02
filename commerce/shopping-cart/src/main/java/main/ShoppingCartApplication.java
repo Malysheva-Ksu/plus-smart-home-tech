@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-@ComponentScan(basePackages = {"controller", "repository", "service", "main", "client"})
+@ComponentScan(basePackages = {"controller", "config", "repository", "service", "main", "client"})
 @EnableJpaRepositories(basePackages = "repository")
 @EntityScan(basePackages = "model.shoppingCart")
 @EnableFeignClients(basePackages = "client")
