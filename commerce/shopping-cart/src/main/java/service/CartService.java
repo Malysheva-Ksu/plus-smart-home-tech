@@ -1,7 +1,7 @@
 package service;
 
-import model.CartItem;
-import model.ShoppingCart;
+import model.shoppingCart.CartItem;
+import model.shoppingCart.ShoppingCart;
 
 import java.math.BigDecimal;
 

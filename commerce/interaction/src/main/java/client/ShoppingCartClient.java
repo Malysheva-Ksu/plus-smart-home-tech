@@ -1,9 +1,9 @@
 package client;
 
 import model.AddItemRequest;
-import model.CartItem;
-import model.ShoppingCart;
-import model.UpdateQuantityRequest;
+import model.shoppingCart.CartItem;
+import model.shoppingCart.ShoppingCart;
+import model.shoppingCart.UpdateQuantityRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.cloud.openfeign.FeignClient;

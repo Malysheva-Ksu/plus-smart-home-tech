@@ -1,8 +1,8 @@
 package service;
 
 import exception.CartItemNotFoundException;
-import model.CartItem;
-import model.ShoppingCart;
+import model.shoppingCart.CartItem;
+import model.shoppingCart.ShoppingCart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

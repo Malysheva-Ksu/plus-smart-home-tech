@@ -1,4 +1,4 @@
-package model;
+package model.shoppingCart;
 
 import jakarta.persistence.*;
 import lombok.Data;

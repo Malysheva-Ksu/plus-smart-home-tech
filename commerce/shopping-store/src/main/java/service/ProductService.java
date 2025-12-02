@@ -1,6 +1,6 @@
 package service;
 
-import model.Product;
+import model.shoppingStore.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
