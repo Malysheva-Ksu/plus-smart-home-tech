@@ -8,6 +8,7 @@ import model.AddItemRequest;
 import model.CartItem;
 import model.ShoppingCart;
 import model.UpdateQuantityRequest;
+import model.warehouse.ReserveRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
@@ -16,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import service.CartService;
-import service.ReserveRequest;
 
 import java.util.stream.Collectors;
 
@@ -172,7 +172,7 @@ public class CartController {
                             CartItem::getQuantity
                     ));
 
-            model.ReserveRequest reserveRequest = new model.ReserveRequest(reservations);
+            ReserveRequest reserveRequest = new ReserveRequest(reservations);
             log.debug("Reserving stock: {}", reservations);
 
             warehouseServiceClient.reserveStock(reserveRequest);
@@ -198,7 +198,7 @@ public class CartController {
                                     CartItem::getProductId,
                                     CartItem::getQuantity
                             ));
-                    model.ReserveRequest releaseRequest = new model.ReserveRequest(reservations);
+                    ReserveRequest releaseRequest = new ReserveRequest(reservations);
                     warehouseServiceClient.releaseStock(releaseRequest);
                     log.info("Stock released after checkout failure for user: {}", userId);
                 }

@@ -1,4 +1,4 @@
-package model;
+package model.warehouse;
 
 import jakarta.persistence.*;
 import lombok.Data;

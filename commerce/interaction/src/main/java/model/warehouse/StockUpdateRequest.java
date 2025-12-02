@@ -1,6 +1,7 @@
-package model;
+package model.warehouse;
 
 
+import model.MovementType;
 import org.jetbrains.annotations.NotNull;
 
 public class StockUpdateRequest {

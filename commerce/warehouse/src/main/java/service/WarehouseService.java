@@ -1,8 +1,8 @@
 package service;
 
 import model.MovementType;
-import model.StockItem;
-import model.StockMovement;
+import model.warehouse.StockItem;
+import model.warehouse.StockMovement;
 
 import java.util.List;
 import java.util.Map;

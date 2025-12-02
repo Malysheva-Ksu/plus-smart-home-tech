@@ -1,7 +1,7 @@
 package repository;
 
 import model.MovementType;
-import model.StockMovement;
+import model.warehouse.StockMovement;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

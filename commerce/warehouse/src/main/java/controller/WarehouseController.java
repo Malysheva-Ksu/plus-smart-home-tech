@@ -2,10 +2,10 @@ package controller;
 
 import exception.StockNotFoundException;
 import exception.StockReservationException;
-import model.ReserveRequest;
-import model.StockItem;
-import model.StockMovement;
-import model.StockUpdateRequest;
+import model.warehouse.ReserveRequest;
+import model.warehouse.StockItem;
+import model.warehouse.StockMovement;
+import model.warehouse.StockUpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;

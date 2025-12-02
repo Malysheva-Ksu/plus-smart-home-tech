@@ -1,7 +1,8 @@
-package model;
+package model.warehouse;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import model.MovementType;
 
 import java.time.LocalDateTime;
 

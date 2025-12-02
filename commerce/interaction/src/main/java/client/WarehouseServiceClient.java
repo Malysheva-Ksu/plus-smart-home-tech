@@ -1,7 +1,7 @@
 package client;
 
-import model.ReserveRequest;
-import model.StockItem;
+import model.warehouse.ReserveRequest;
+import model.warehouse.StockItem;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
