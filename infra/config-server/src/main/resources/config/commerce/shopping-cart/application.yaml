@@ -6,7 +6,7 @@ spring:
     name: shopping-cart
 
   datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/shopping_cart}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/shopping-cart}
     username: ${DATASOURCE_USERNAME:postgres}
     password: ${DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
