@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: shopping-store-service
+    name: shopping-store
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/shopping_store}
