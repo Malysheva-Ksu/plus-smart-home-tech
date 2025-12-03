@@ -1,9 +1,5 @@
 package main;
 
-import model.warehouse.ReserveRequest;
-import model.warehouse.StockItem;
-import model.warehouse.StockMovement;
-import model.warehouse.StockUpdateRequest;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
