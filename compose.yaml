@@ -24,6 +24,8 @@ services:
       discovery-server:
         condition: service_healthy
     restart: unless-stopped
+    ports:
+      - "8888:8888"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       SPRING_PROFILES_ACTIVE: native
