@@ -40,7 +40,7 @@ grpc:
   client:
 
     warehouse-service:
-      address: 'eureka:warehouse-service'
+      address: 'eureka:warehouse'
       enableKeepAlive: true
       keepAliveWithoutCalls: true
       negotiationType: plaintext
