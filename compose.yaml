@@ -187,7 +187,6 @@ services:
       DATASOURCE_USERNAME: postgres
       DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
     command: ["/bin/sh", "-c", "echo 'Waiting for a safe 30 seconds to ensure Kafka broker is fully operational for clients...' && sleep 30 && echo 'Starting Analyzer.' && java -jar /app/app.jar"]
 
   warehouse:
@@ -212,7 +211,6 @@ services:
       DATASOURCE_PASSWORD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
 
   shopping-store:
     build:
@@ -236,7 +234,6 @@ services:
       DATASOURCE_PASSWORD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
 
   shopping-cart:
     build:
@@ -260,7 +257,6 @@ services:
       DATASOURCE_PASSWORD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
 
   aggregator:
     build:
@@ -279,7 +275,6 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
 
   collector:
     build:
@@ -300,7 +295,6 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
 
   pgadmin:
     image: dpage/pgadmin4:latest
