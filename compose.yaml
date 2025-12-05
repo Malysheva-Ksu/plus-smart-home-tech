@@ -41,7 +41,6 @@ services:
     environment:
       POSTGRES_DB: analyzer
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_analyzer_data:/var/lib/postgresql/data
@@ -61,7 +60,6 @@ services:
     environment:
       POSTGRES_DB: warehouse
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_warehouse_data:/var/lib/postgresql/data
@@ -81,7 +79,6 @@ services:
     environment:
       POSTGRES_DB: shopping_store
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_shopping_store_data:/var/lib/postgresql/data
@@ -101,7 +98,6 @@ services:
     environment:
       POSTGRES_DB: shopping_cart
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_shopping_cart_data:/var/lib/postgresql/data
@@ -185,7 +181,6 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
       DATASOURCE_URL: jdbc:postgresql://postgres-analyzer:5432/analyzer
       DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     command: ["/bin/sh", "-c", "echo 'Waiting for a safe 30 seconds to ensure Kafka broker is fully operational for clients...' && sleep 30 && echo 'Starting Analyzer.' && java -jar /app/app.jar"]
 
@@ -208,7 +203,6 @@ services:
     environment:
       DATASOURCE_URL: jdbc:postgresql://postgres-warehouse:5432/warehouse
       DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
 
@@ -231,7 +225,6 @@ services:
     environment:
       DATASOURCE_URL: jdbc:postgresql://postgres-shopping-store:5432/shopping_store
       DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
 
@@ -254,7 +247,6 @@ services:
     environment:
       DATASOURCE_URL: jdbc:postgresql://postgres-shopping-cart:5432/shopping_cart
       DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
 
