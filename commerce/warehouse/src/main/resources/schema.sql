@@ -1,5 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS warehouse;
-
 DROP TABLE IF EXISTS warehouse.stock_movements CASCADE;
 DROP TABLE IF EXISTS warehouse.stock_items CASCADE;
 
