@@ -55,7 +55,7 @@ services:
     container_name: postgres-warehouse
     hostname: postgres-warehouse
     ports:
-      - "5433:5432"
+      - "5432:5432"
     restart: unless-stopped
     environment:
       POSTGRES_DB: warehouse
