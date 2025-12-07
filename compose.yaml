@@ -41,6 +41,7 @@ services:
     environment:
       POSTGRES_DB: analyzer
       POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_analyzer_data:/var/lib/postgresql/data
@@ -55,11 +56,12 @@ services:
     container_name: postgres-warehouse
     hostname: postgres-warehouse
     ports:
-      - "5432:5432"
+      - "5433:5432"
     restart: unless-stopped
     environment:
       POSTGRES_DB: warehouse
       POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_warehouse_data:/var/lib/postgresql/data
@@ -79,6 +81,7 @@ services:
     environment:
       POSTGRES_DB: shopping_store
       POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_shopping_store_data:/var/lib/postgresql/data
@@ -98,6 +101,7 @@ services:
     environment:
       POSTGRES_DB: shopping_cart
       POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_shopping_cart_data:/var/lib/postgresql/data
