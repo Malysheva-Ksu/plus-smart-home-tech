@@ -1,5 +1,6 @@
 package service;
 
+import dto.ProductDto;
 import model.shoppingStore.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,8 @@ public interface ProductService {
     List<String> findAllCategories();
 
     Product save(Product product);
+
+    Product saveFromDto(ProductDto productDto);
 
     void deleteById(Long id);
 }

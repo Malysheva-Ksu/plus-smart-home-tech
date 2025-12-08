@@ -1,5 +1,6 @@
 package service;
 
+import dto.ProductDto;
 import model.shoppingStore.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +59,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product save(Product product) {
+        return productRepository.save(product);
+    }
+
+    @Override
+    public Product saveFromDto(ProductDto dto) {
+        Product product = new Product();
+        product.setName(dto.getProductName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setCategory(dto.getProductCategory());
+        product.setImageUrl(dto.getImageSrc());
+
+        boolean isAvailable = "ACTIVE".equals(dto.getProductState())
+                && !"ENDED".equals(dto.getQuantityState());
+        product.setAvailable(isAvailable);
+
         return productRepository.save(product);
     }
 
