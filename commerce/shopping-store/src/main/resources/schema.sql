@@ -1,7 +1,11 @@
-DROP TABLE IF EXISTS shopping_store.products CASCADE;
-DROP TABLE IF EXISTS shopping_store.categories CASCADE;
+\c postgres
+CREATE DATABASE shopping-store;
+\c shopping_store
 
-CREATE TABLE shopping_store.products (
+DROP TABLE IF EXISTS shopping-store.products CASCADE;
+DROP TABLE IF EXISTS shopping-store.categories CASCADE;
+
+CREATE TABLE shopping-store.products (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -12,7 +16,7 @@ CREATE TABLE shopping_store.products (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE shopping_store.categories (
+CREATE TABLE shopping-store.categories (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
