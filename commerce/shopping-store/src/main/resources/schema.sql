@@ -1,7 +1,3 @@
-\c postgres
-CREATE DATABASE shopping_store;
-\c shopping_store
-
 DROP TABLE IF EXISTS shopping_store.products CASCADE;
 DROP TABLE IF EXISTS shopping_store.categories CASCADE;
 

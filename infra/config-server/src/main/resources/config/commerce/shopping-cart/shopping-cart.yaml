@@ -6,7 +6,7 @@ spring:
     name: shopping-cart
 
   datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/shopping-cart}
+    url: ${DATASOURCE_URL:jdbc:postgresql://db:5432/shopping_cart}
     username: ${DATASOURCE_USERNAME:postgres}
     driver-class-name: org.postgresql.Driver
 
@@ -21,7 +21,7 @@ spring:
         format_sql: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
     producer:
       client-id: shopping-cart-service-producer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -65,10 +65,10 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${DISCOVERY_SERVER_HOSTNAME:discovery-server}:8761/eureka/
   instance:
     preferIpAddress: true
-    hostname: localhost
+    hostname: shopping-cart
     instance-id: "${spring.application.name}:${random.value}"
     leaseRenewalIntervalInSeconds: 10
 

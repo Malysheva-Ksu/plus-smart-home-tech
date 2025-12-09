@@ -6,7 +6,7 @@ spring:
     name: warehouse
 
   datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://postgres-warehouse:5432/warehouse}
+    url: ${DATASOURCE_URL:jdbc:postgresql://db:5432/warehouse}
     username: ${DATASOURCE_USERNAME:postgres}
     driver-class-name: org.postgresql.Driver
 
