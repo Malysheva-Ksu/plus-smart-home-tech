@@ -78,3 +78,32 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+
+  config-server:
+    build:
+      context: ./config-server
+    container_name: config-server
+    hostname: config-server
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  warehouse:
+    build:
+      context: ./warehouse
+    container_name: warehouse
+    hostname: warehouse
+    depends_on:
+      discovery-server:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
