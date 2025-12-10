@@ -1,7 +1,11 @@
-SELECT 'CREATE DATABASE warehouse' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'warehouse')\gexec;
+CREATE DATABASE warehouse;
+\c warehouse
 
-SELECT 'CREATE DATABASE shopping_store' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'shopping_store')\gexec;
+CREATE DATABASE shopping-store;
+\c shopping-store
 
-SELECT 'CREATE DATABASE shopping_cart' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'shopping_cart')\gexec;
+CREATE DATABASE shopping-cart;
+\c shopping-cart
 
-SELECT 'CREATE DATABASE analyzer' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'analyzer')\gexec;
+CREATE DATABASE analyzer;
+\c analyzer

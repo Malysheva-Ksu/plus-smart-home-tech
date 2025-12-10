@@ -1,3 +1,7 @@
+\c postgres
+CREATE DATABASE shopping_cart;
+\c shopping_cart
+
 DROP TABLE IF EXISTS shopping_cart.carts CASCADE;
 DROP TABLE IF EXISTS shopping_cart.cart_items CASCADE;
 

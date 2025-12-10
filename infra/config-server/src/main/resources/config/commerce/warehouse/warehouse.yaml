@@ -6,7 +6,7 @@ spring:
     name: warehouse
 
   datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://db:5432/warehouse}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/warehouse}
     username: ${DATASOURCE_USERNAME:postgres}
     driver-class-name: org.postgresql.Driver
 
@@ -20,7 +20,7 @@ spring:
         format_sql: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       client-id: warehouse-service-producer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -51,10 +51,10 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://${DISCOVERY_SERVER_HOSTNAME:discovery-server}:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
   instance:
     preferIpAddress: true
-    hostname: warehouse
+    hostname: localhost
     instance-id: "${spring.application.name}:${random.value}"
     leaseRenewalIntervalInSeconds: 10
 
