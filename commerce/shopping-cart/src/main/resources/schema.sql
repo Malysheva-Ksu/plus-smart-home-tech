@@ -1,22 +1,19 @@
-\c postgres
-CREATE DATABASE shopping_cart;
-\c shopping_cart
+DROP TABLE IF EXISTS shopping_cart_product CASCADE;
+DROP TABLE IF EXISTS shopping_cart CASCADE;
 
-DROP TABLE IF EXISTS shopping_cart.carts CASCADE;
-DROP TABLE IF EXISTS shopping_cart.cart_items CASCADE;
-
-CREATE TABLE shopping_cart.carts (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL UNIQUE,
+CREATE TABLE shopping_cart (
+    id UUID PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     total_amount DECIMAL(10,2) DEFAULT 0,
-    last_updated TIMESTAMP DEFAULT NOW()
+    last_updated TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE shopping_cart.cart_items (
-    id BIGSERIAL PRIMARY KEY,
-    cart_id BIGINT NOT NULL REFERENCES shopping_cart.carts(id),
-    product_id BIGINT NOT NULL,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
+CREATE TABLE shopping_cart_product (
+    id UUID PRIMARY KEY,
+    cart_id UUID NOT NULL REFERENCES shopping_cart(id),
+    product_id UUID NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity >= 0),
     price DECIMAL(10,2) NOT NULL,
     UNIQUE(cart_id, product_id)
 );

@@ -9,23 +9,25 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID; // Добавлен для типа UUID
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    Page<Product> findByCategory(String category, Pageable pageable);
+    Page<Product> findByProductCategory(String productCategory, Pageable pageable);
 
-    Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    Page<Product> findByProductNameContainingIgnoreCase(String productName, Pageable pageable);
 
-    Page<Product> findByCategoryAndNameContainingIgnoreCase(String category, String name, Pageable pageable);
+    Page<Product> findByProductCategoryAndProductNameContainingIgnoreCase(String productCategory, String productName, Pageable pageable);
 
-    @Query("SELECT DISTINCT p.category FROM Product p WHERE p.category IS NOT NULL")
-    List<String> findAllDistinctCategories();
+    @Query("SELECT DISTINCT p.productCategory FROM Product p WHERE p.productCategory IS NOT NULL")
+    List<String> findAllDistinctProductCategory();
 
-    @Query("SELECT p FROM Product p WHERE p.available = true AND " +
-            "(:category IS NULL OR p.category = :category) AND " +
-            "(:search IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Product> findAvailableProductsWithFilters(@Param("category") String category,
-                                                   @Param("search") String search,
-                                                   Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE " +
+            "(:productCategory IS NULL OR p.productCategory = :productCategory) AND " +
+            "(:search IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Product> findProductsWithFilters(@Param("productCategory") String productCategory,
+                                          @Param("search") String search,
+                                          Pageable pageable);
+
 }

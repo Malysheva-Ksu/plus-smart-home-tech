@@ -1,148 +1,142 @@
 package service;
 
-import exception.CartItemNotFoundException;
+import client.ProductServiceClient;
+import exception.CartNotFoundException;
+import exception.ItemNotInCartException;
+import jakarta.transaction.Transactional;
 import model.shoppingCart.CartItem;
 import model.shoppingCart.ShoppingCart;
+import model.shoppingCart.ShoppingCartResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import repository.CartItemRepository;
 import repository.CartRepository;
-
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class CartServiceImpl implements CartService {
-
     private static final Logger log = LoggerFactory.getLogger(CartServiceImpl.class);
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final ProductServiceClient productServiceClient;
 
-    public CartServiceImpl(CartRepository cartRepository, CartItemRepository cartItemRepository) {
+    public CartServiceImpl(CartRepository cartRepository,
+                           CartItemRepository cartItemRepository,
+                           ProductServiceClient productServiceClient) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
+        this.productServiceClient = productServiceClient;
     }
 
     @Override
-    public CartItem updateItemQuantity(Long userId, Long itemId, Integer quantity) {
-        log.debug("Updating item quantity: userId={}, itemId={}, quantity={}", userId, itemId, quantity);
+    public ShoppingCartResponseDto addProductsToCart(String username, Map<UUID, Integer> productList) {
+        log.debug("Adding/updating products for user: {}", username);
 
-        CartItem cartItem = cartItemRepository.findByIdAndCartUserIdWithCart(itemId, userId)
-                .orElseThrow(() -> new CartItemNotFoundException(itemId, userId));
+        ShoppingCart cart = getOrCreateCart(username);
+        boolean isUpdated = false;
 
-        if (quantity <= 0) {
-            removeItem(userId, itemId);
-            throw new IllegalArgumentException("Item removed due to zero quantity");
+        for (Map.Entry<UUID, Integer> entry : productList.entrySet()) {
+            UUID productId = entry.getKey();
+            Integer quantity = entry.getValue();
+
+            if (quantity <= 0) {
+                removeItemByProductId(cart, productId);
+                isUpdated = true;
+                continue;
+            }
+
+            BigDecimal price = getProductPriceFromService(productId);
+
+            Optional<CartItem> existingItemOpt = cartItemRepository.findByCartUsernameAndProductId(username, productId);
+
+            if (existingItemOpt.isPresent()) {
+                CartItem item = existingItemOpt.get();
+                item.setQuantity(quantity);
+                item.setPrice(price);
+                cartItemRepository.save(item);
+                log.debug("Updated existing item quantity: {}", quantity);
+            } else {
+                CartItem newItem = new CartItem();
+                newItem.setCart(cart);
+                newItem.setProductId(productId);
+                newItem.setQuantity(quantity);
+                newItem.setPrice(price);
+
+                CartItem savedItem = cartItemRepository.save(newItem);
+                cart.getItems().add(savedItem);
+                log.debug("Created new cart item");
+            }
+            isUpdated = true;
         }
 
-        cartItem.setQuantity(quantity);
-        CartItem updatedItem = cartItemRepository.save(cartItem);
-
-        ShoppingCart cart = cartItem.getCart();
-        updateCartTotal(cart);
-        cartRepository.save(cart);
-
-        log.info("Item quantity updated: userId={}, itemId={}, newQuantity={}", userId, itemId, quantity);
-
-        return updatedItem;
-    }
-
-    @Override
-    public void removeItem(Long userId, Long itemId) {
-        log.debug("Removing item from cart: userId={}, itemId={}", userId, itemId);
-
-        CartItem cartItem = cartItemRepository.findByIdAndCartUserIdWithCart(itemId, userId)
-                .orElseThrow(() -> new CartItemNotFoundException(itemId, userId));
-
-        ShoppingCart cart = cartItem.getCart();
-
-        cart.getItems().remove(cartItem);
-
-        cartItemRepository.delete(cartItem);
-
-        updateCartTotal(cart);
-        cartRepository.save(cart);
-
-        log.info("Item removed from cart: userId={}, itemId={}", userId, itemId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public ShoppingCart getCart(Long userId) {
-        log.debug("Getting cart for user: {}", userId);
-        return cartRepository.findByUserIdWithItems(userId)
-                .orElseGet(() -> createNewCart(userId));
-    }
-
-    @Override
-    public CartItem addItem(Long userId, Long productId, Integer quantity, BigDecimal price) {
-        log.debug("Adding item to cart: userId={}, productId={}, quantity={}, price={}",
-                userId, productId, quantity, price);
-
-        ShoppingCart cart = getCart(userId);
-
-        Optional<CartItem> existingItem = cartItemRepository.findByUserIdAndProductId(userId, productId);
-
-        CartItem savedItem;
-
-        if (existingItem.isPresent()) {
-            CartItem item = existingItem.get();
-            item.setQuantity(item.getQuantity() + quantity);
-            savedItem = cartItemRepository.save(item);
-            log.debug("Updated existing item quantity: {}", item.getQuantity());
-        } else {
-            CartItem newItem = new CartItem();
-            newItem.setCart(cart);
-            newItem.setProductId(productId);
-            newItem.setQuantity(quantity);
-            newItem.setPrice(price);
-
-            savedItem = cartItemRepository.save(newItem);
-            cart.getItems().add(savedItem);
-            log.debug("Created new cart item");
+        if (isUpdated) {
+            updateCartTotal(cart);
+            cartRepository.save(cart);
         }
 
-        updateCartTotal(cart);
-        cartRepository.save(cart);
-
-        log.info("Item added to cart successfully: userId={}, productId={}", userId, productId);
-
-        return savedItem;
+        log.info("Products processed successfully for user: {}", username);
+        return convertToDto(cart);
     }
 
     @Override
-    public void clearCart(Long userId) {
-        log.debug("Clearing cart for user: {}", userId);
+    public ShoppingCartResponseDto getCartByUsername(String username) {
+        log.debug("Getting cart for user: {}", username);
 
-        ShoppingCart cart = getCart(userId);
+        ShoppingCart cart = cartRepository.findByUsername(username)
+                .orElseGet(() -> createNewCart(username));
 
-        cartItemRepository.deleteAllByUserId(userId);
-        cart.getItems().clear();
-
-        updateCartTotal(cart);
-        cartRepository.save(cart);
-
-        log.info("Cart cleared for user: {}", userId);
+        return convertToDto(cart);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public CartItem getCartItem(Long userId, Long itemId) {
-        log.debug("Getting cart item: userId={}, itemId={}", userId, itemId);
-        return cartItemRepository.findByIdAndCartUserId(itemId, userId)
-                .orElseThrow(() -> new CartItemNotFoundException(itemId, userId));
-    }
-
-    private ShoppingCart createNewCart(Long userId) {
-        log.debug("Creating new cart for user: {}", userId);
+    private ShoppingCart createNewCart(String username) {
+        log.debug("Creating new cart for user: {}", username);
         ShoppingCart cart = new ShoppingCart();
-        cart.setUserId(userId);
+        cart.setUsername(username);
         cart.setTotalAmount(BigDecimal.ZERO);
         return cartRepository.save(cart);
+    }
+
+    private ShoppingCart getOrCreateCart(String username) {
+        return cartRepository.findByUsername(username)
+                .orElseGet(() -> createNewCart(username));
+    }
+
+    private ShoppingCartResponseDto convertToDto(ShoppingCart cart) {
+        Map<UUID, Integer> productsMap = cart.getItems().stream()
+                .collect(Collectors.toMap(
+                        CartItem::getProductId,
+                        CartItem::getQuantity
+                ));
+
+        return ShoppingCartResponseDto.builder()
+                .username(cart.getUsername())
+                .totalAmount(cart.getTotalAmount())
+                .products(productsMap)
+                .build();
+    }
+
+    private BigDecimal getProductPriceFromService(UUID productId) {
+        return BigDecimal.valueOf(100.00);
+    }
+
+    private void removeItemByProductId(ShoppingCart cart, UUID productId) {
+        Optional<CartItem> itemToRemove = cart.getItems().stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst();
+
+        if (itemToRemove.isPresent()) {
+            cart.getItems().remove(itemToRemove.get());
+            cartItemRepository.delete(itemToRemove.get());
+            log.info("Item removed from cart: username={}, productId={}", cart.getUsername(), productId);
+        }
     }
 
     private void updateCartTotal(ShoppingCart cart) {
@@ -152,4 +146,84 @@ public class CartServiceImpl implements CartService {
         cart.setTotalAmount(total);
         log.debug("Updated cart total: {}", total);
     }
+
+    @Override
+    public ShoppingCartResponseDto changeSingleProductQuantity(String username, UUID productId, Integer newQuantity) {
+
+        ShoppingCart cart = cartRepository.findByUsername(username)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
+
+        Optional<CartItem> existingItemOpt = cartItemRepository.findByCartUsernameAndProductId(username, productId);
+
+        if (existingItemOpt.isEmpty()) {
+            throw new ItemNotInCartException(productId);
+        }
+
+        CartItem item = existingItemOpt.get();
+
+        if (newQuantity <= 0) {
+            removeItemByProductId(cart, productId);
+        } else {
+            item.setQuantity(newQuantity);
+            cartItemRepository.save(item);
+        }
+
+        updateCartTotal(cart);
+        cartRepository.save(cart);
+
+        return convertToDto(cart);
+    }
+
+    @Override
+    public ShoppingCartResponseDto removeProductsFromCart(String username, List<UUID> productIds) {
+
+        ShoppingCart cart = cartRepository.findByUsernameWithItems(username)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
+
+        boolean removed = false;
+
+        for (UUID productId : productIds) {
+            Optional<CartItem> itemToRemove = cart.getItems().stream()
+                    .filter(item -> item.getProductId().equals(productId))
+                    .findFirst();
+
+            if (itemToRemove.isPresent()) {
+                CartItem item = itemToRemove.get();
+                cart.getItems().remove(item);
+                cartItemRepository.delete(item);
+                removed = true;
+                log.debug("Product removed from cart: {}", productId);
+            } else {
+                log.warn("Attempted to remove product not found in cart: {}", productId);
+            }
+        }
+
+        if (removed) {
+            updateCartTotal(cart);
+            cartRepository.save(cart);
+        }
+
+        return convertToDto(cart);
+    }
+
+    @Override
+    public void deactivateCart(String username) {
+        log.debug("Deactivating cart for user: {}", username);
+
+        ShoppingCart cart = cartRepository.findByUsername(username)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
+
+        cart.setIsActive(false);
+
+        if (!cart.getItems().isEmpty()) {
+            cartItemRepository.deleteAll(cart.getItems());
+            cart.getItems().clear();
+        }
+
+        cart.setTotalAmount(BigDecimal.ZERO);
+        cartRepository.save(cart);
+
+        log.info("Cart successfully deactivated for user: {}", username);
+    }
+
 }

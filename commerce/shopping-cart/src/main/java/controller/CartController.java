@@ -1,14 +1,11 @@
 package controller;
 
-import client.ProductServiceClient;
+import jakarta.transaction.Transactional;
 import client.WarehouseServiceClient;
-import exception.InsufficientStockException;
-import exception.ServiceUnavailableException;
-import model.AddItemRequest;
+import client.ProductServiceClient;
 import model.shoppingCart.CartItem;
-import model.shoppingCart.ShoppingCart;
-import model.shoppingCart.UpdateQuantityRequest;
-import model.warehouse.ReserveRequest;
+import model.shoppingCart.ChangeQuantityRequest;
+import model.shoppingCart.ShoppingCartResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
@@ -18,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import service.CartService;
 
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/v1/shopping-cart")
@@ -41,197 +40,79 @@ public class CartController {
         this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ShoppingCart> getCart(@PathVariable Long userId) {
-        log.info("Getting cart for user: {}", userId);
+    @GetMapping
+    public ResponseEntity<ShoppingCartResponseDto> getCart(@RequestParam String username) {
+        log.info("Getting cart for user: {}", username);
 
-        ShoppingCart cart = cartService.getCart(userId);
-        return ResponseEntity.ok(cart);
+        ShoppingCartResponseDto cartDto = cartService.getCartByUsername(username);
+        return ResponseEntity.ok(cartDto);
     }
 
-    @PostMapping("/{userId}/items")
-    public ResponseEntity<CartItem> addItem(@PathVariable Long userId,
-                                            @RequestBody AddItemRequest request) {
-        log.info("Adding item to cart: userId={}, productId={}, quantity={}",
-                userId, request.getProductId(), request.getQuantity());
+    @PutMapping
+    @Transactional
+    public ResponseEntity<ShoppingCartResponseDto> addProductsToCart(
+            @RequestParam String username,
+            @RequestBody Map<UUID, Integer> productList) {
 
-        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("shoppingStore");
+        log.info("Starting update/add items for cart: username={}", username);
 
-        CartItem cartItem = circuitBreaker.run(() -> {
-            log.debug("Checking product existence: productId={}", request.getProductId());
-            var product = productServiceClient.getProduct(request.getProductId());
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("shoppingServices");
 
-            log.debug("Checking stock availability: productId={}", request.getProductId());
-            var stock = warehouseServiceClient.getStock(request.getProductId());
+        ShoppingCartResponseDto cartDto = circuitBreaker.run(() -> {
 
-            int availableQuantity = stock.getQuantity() - stock.getReserved();
-            if (availableQuantity < request.getQuantity()) {
-                log.warn("Insufficient stock: productId={}, requested={}, available={}",
-                        request.getProductId(), request.getQuantity(), availableQuantity);
-                throw new InsufficientStockException(
-                        String.format("Not enough stock available. Requested: %d, Available: %d",
-                                request.getQuantity(), availableQuantity)
-                );
-            }
-
-            log.debug("Adding item to cart: userId={}, productId={}, price={}",
-                    userId, request.getProductId(), product.getPrice());
-            return cartService.addItem(userId, request.getProductId(),
-                    request.getQuantity(), product.getPrice());
+            return cartService.addProductsToCart(username, productList);
 
         }, throwable -> {
-            log.error("Circuit breaker triggered for addItem - userId: {}, productId: {}, error: {}",
-                    userId, request.getProductId(), throwable.getMessage());
-            throw new ServiceUnavailableException("Unable to add item to cart - dependent services unavailable");
+            log.error("Circuit breaker triggered for addProductsToCart - username: {}, error: {}",
+                    username, throwable.getMessage());
+            throw new RuntimeException("Service Unavailable: Unable to add items to cart.");
         });
 
-        log.info("Item successfully added to cart: userId={}, cartItemId={}", userId, cartItem.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartItem);
+        log.info("Items successfully added/updated in cart: username={}", username);
+        return ResponseEntity.status(HttpStatus.OK).body(cartDto);
     }
 
-    @PutMapping("/{userId}/items/{itemId}")
-    public ResponseEntity<CartItem> updateQuantity(@PathVariable Long userId,
-                                                   @PathVariable Long itemId,
-                                                   @RequestBody UpdateQuantityRequest request) {
-        log.info("Updating item quantity: userId={}, itemId={}, newQuantity={}",
-                userId, itemId, request.getQuantity());
+    @PostMapping("/change-quantity")
+    @Transactional
+    public ResponseEntity<ShoppingCartResponseDto> changeProductQuantity(
+            @RequestParam String username,
+            @RequestBody ChangeQuantityRequest request) {
 
-        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("warehouseService");
+        log.info("Changing product quantity: username={}, productId={}, newQuantity={}",
+                username, request.getProductId(), request.getNewQuantity());
 
-        CartItem updatedItem = circuitBreaker.run(() -> {
-            CartItem existingItem = cartService.getCartItem(userId, itemId);
+        ShoppingCartResponseDto response = cartService.changeSingleProductQuantity(
+                username,
+                request.getProductId(),
+                request.getNewQuantity()
+        );
 
-            if (request.getQuantity() > existingItem.getQuantity()) {
-                int additionalQuantity = request.getQuantity() - existingItem.getQuantity();
-                var stock = warehouseServiceClient.getStock(existingItem.getProductId());
-
-                int availableQuantity = stock.getQuantity() - stock.getReserved();
-                if (availableQuantity < additionalQuantity) {
-                    log.warn("Insufficient stock for update: productId={}, additional={}, available={}",
-                            existingItem.getProductId(), additionalQuantity, availableQuantity);
-                    throw new InsufficientStockException(
-                            String.format("Not enough stock available for update. Additional needed: %d, Available: %d",
-                                    additionalQuantity, availableQuantity)
-                    );
-                }
-            }
-
-            return cartService.updateItemQuantity(userId, itemId, request.getQuantity());
-
-        }, throwable -> {
-            log.error("Circuit breaker triggered for updateQuantity - userId: {}, itemId: {}, error: {}",
-                    userId, itemId, throwable.getMessage());
-            throw new ServiceUnavailableException("Unable to update item quantity - warehouse service unavailable");
-        });
-
-        log.info("Item quantity updated: userId={}, itemId={}", userId, itemId);
-        return ResponseEntity.ok(updatedItem);
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{userId}/items/{itemId}")
-    public ResponseEntity<Void> removeItem(@PathVariable Long userId,
-                                           @PathVariable Long itemId) {
-        log.info("Removing item from cart: userId={}, itemId={}", userId, itemId);
+    @PostMapping("/remove")
+    @Transactional
+    public ResponseEntity<ShoppingCartResponseDto> removeProductsFromCart(
+            @RequestParam String username,
+            @RequestBody List<UUID> productIds) {
 
-        cartService.removeItem(userId, itemId);
+        log.info("Removing products from cart: username={}, productIds={}", username, productIds);
 
-        log.info("Item removed from cart: userId={}, itemId={}", userId, itemId);
+        ShoppingCartResponseDto response = cartService.removeProductsFromCart(username, productIds);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping
+    @Transactional
+    public ResponseEntity<Void> deactivateCart(
+            @RequestParam String username) {
+
+        log.info("Attempting to deactivate or clear cart for user: {}", username);
+
+        cartService.deactivateCart(username);
+
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{userId}/items")
-    public ResponseEntity<Void> clearCart(@PathVariable Long userId) {
-        log.info("Clearing cart for user: {}", userId);
-
-        cartService.clearCart(userId);
-
-        log.info("Cart cleared for user: {}", userId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{userId}/checkout")
-    public ResponseEntity<String> checkout(@PathVariable Long userId) {
-        log.info("Starting checkout process for user: {}", userId);
-
-        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("warehouseService");
-
-        String orderId = circuitBreaker.run(() -> {
-            ShoppingCart cart = cartService.getCart(userId);
-
-            if (cart.getItems().isEmpty()) {
-                log.warn("Checkout failed: empty cart for user: {}", userId);
-                throw new IllegalArgumentException("Cannot checkout empty cart");
-            }
-
-            log.debug("Cart contents for checkout - items: {}, total: {}",
-                    cart.getItems().size(), cart.getTotalAmount());
-
-            var reservations = cart.getItems().stream()
-                    .collect(Collectors.toMap(
-                            CartItem::getProductId,
-                            CartItem::getQuantity
-                    ));
-
-            ReserveRequest reserveRequest = new ReserveRequest(reservations);
-            log.debug("Reserving stock: {}", reservations);
-
-            warehouseServiceClient.reserveStock(reserveRequest);
-            log.info("Stock reserved successfully for user: {}", userId);
-
-            String generatedOrderId = "ORDER-" + System.currentTimeMillis() + "-" + userId;
-            log.info("Order created: {}", generatedOrderId);
-
-            cartService.clearCart(userId);
-            log.info("Cart cleared after successful checkout for user: {}", userId);
-
-            return generatedOrderId;
-
-        }, throwable -> {
-            log.error("Circuit breaker triggered for checkout - userId: {}, error: {}",
-                    userId, throwable.getMessage());
-
-            try {
-                ShoppingCart cart = cartService.getCart(userId);
-                if (!cart.getItems().isEmpty()) {
-                    var reservations = cart.getItems().stream()
-                            .collect(Collectors.toMap(
-                                    CartItem::getProductId,
-                                    CartItem::getQuantity
-                            ));
-                    ReserveRequest releaseRequest = new ReserveRequest(reservations);
-                    warehouseServiceClient.releaseStock(releaseRequest);
-                    log.info("Stock released after checkout failure for user: {}", userId);
-                }
-            } catch (Exception e) {
-                log.error("Failed to release stock after checkout failure: {}", e.getMessage());
-            }
-
-            throw new ServiceUnavailableException("Unable to complete checkout - service unavailable");
-        });
-
-        log.info("Checkout completed successfully for user: {}, orderId: {}", userId, orderId);
-        return ResponseEntity.ok(orderId);
-    }
-
-    @GetMapping("/{userId}/total")
-    public ResponseEntity<Double> getCartTotal(@PathVariable Long userId) {
-        log.debug("Getting cart total for user: {}", userId);
-
-        ShoppingCart cart = cartService.getCart(userId);
-        double total = cart.getTotalAmount().doubleValue();
-
-        return ResponseEntity.ok(total);
-    }
-
-    @GetMapping("/{userId}/count")
-    public ResponseEntity<Integer> getCartItemCount(@PathVariable Long userId) {
-        log.debug("Getting cart item count for user: {}", userId);
-
-        ShoppingCart cart = cartService.getCart(userId);
-        int itemCount = cart.getItems().stream()
-                .mapToInt(CartItem::getQuantity)
-                .sum();
-
-        return ResponseEntity.ok(itemCount);
-    }
 }

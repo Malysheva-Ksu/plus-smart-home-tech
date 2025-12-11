@@ -1,6 +1,7 @@
 package service;
 
 import dto.ProductDto;
+import exception.ProductNotFoundException;
 import model.shoppingStore.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID; // Добавлен для типа UUID
 
 @Service
 @Transactional
@@ -23,38 +25,32 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Product> findAll(Pageable pageable) {
-        return productRepository.findAll(pageable);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public Page<Product> findByCategory(String category, Pageable pageable) {
-        return productRepository.findByCategory(category, pageable);
+        return productRepository.findByProductCategory(category, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Product> findByNameContaining(String search, Pageable pageable) {
-        return productRepository.findByNameContainingIgnoreCase(search, pageable);
+        return productRepository.findByProductNameContainingIgnoreCase(search, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Product> findByCategoryAndNameContaining(String category, String search, Pageable pageable) {
-        return productRepository.findByCategoryAndNameContainingIgnoreCase(category, search, pageable);
+        return productRepository.findByProductCategoryAndProductNameContainingIgnoreCase(category, search, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Product> findById(Long id) {
+    public Optional<Product> findById(UUID id) {
         return productRepository.findById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<String> findAllCategories() {
-        return productRepository.findAllDistinctCategories();
+        return productRepository.findAllDistinctProductCategory();
     }
 
     @Override
@@ -64,22 +60,54 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product saveFromDto(ProductDto dto) {
-        Product product = new Product();
-        product.setName(dto.getProductName());
+        Product product;
+
+        if (dto.getProductId() != null) {
+            product = productRepository.findById(dto.getProductId()).orElse(new Product());
+            product.setProductId(dto.getProductId());
+        } else {
+            product = new Product();
+        }
+
+        product.setProductName(dto.getProductName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
-        product.setCategory(dto.getProductCategory());
-        product.setImageUrl(dto.getImageSrc());
+        product.setProductCategory(dto.getProductCategory());
+        product.setImageSrc(dto.getImageSrc());
 
-        boolean isAvailable = "ACTIVE".equals(dto.getProductState())
-                && !"ENDED".equals(dto.getQuantityState());
-        product.setAvailable(isAvailable);
+        product.setQuantityState(dto.getQuantityState());
+        product.setProductState(dto.getProductState());
 
         return productRepository.save(product);
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deactivateProduct(UUID productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+
+        product.setProductState("DEACTIVATE");
+
+        productRepository.save(product);
+    }
+
+    @Override
+    public void deleteById(UUID id) {
         productRepository.deleteById(id);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Product> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable);
+    }
+
+    @Override
+    public void setQuantityState(UUID productId, String quantityState) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+
+        product.setQuantityState(quantityState);
+
+        productRepository.save(product);
     }
 }

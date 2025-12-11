@@ -3,24 +3,24 @@ package client;
 import model.shoppingStore.Product;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping; // Добавлен для метода PUT
+import org.springframework.web.bind.annotation.RequestBody; // Добавлен для тела запроса
 import org.springframework.cloud.openfeign.FeignClient;
 
 import java.util.List;
+import java.util.UUID; // Добавлен для типа UUID
 
 @FeignClient(name = "shopping-store", path = "/api/v1/shopping-store")
 public interface ProductServiceClient {
 
-    @GetMapping("/{id}")
-    Product getProduct(@PathVariable("id") Long id);
+    @PutMapping
+    Product addProduct(@RequestBody Product product);
 
-    @GetMapping
-    List<Product> getProducts(
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    );
+    @GetMapping("/{productId}")
+    Product getProduct(@PathVariable("productId") UUID productId);
+
+    @GetMapping("/categories/{productCategory}")
+    List<Product> getProductsByCategory(@PathVariable("productCategory") String productCategory);
 
     @GetMapping("/categories")
     List<String> getCategories();

@@ -7,24 +7,29 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ProductService {
 
-    Page<Product> findAll(Pageable pageable);
+    public Page<Product> findByCategory(String category, Pageable pageable);
 
-    Page<Product> findByCategory(String category, Pageable pageable);
+    public Page<Product> findByNameContaining(String search, Pageable pageable);
 
-    Page<Product> findByNameContaining(String search, Pageable pageable);
+    public Page<Product> findByCategoryAndNameContaining(String category, String search, Pageable pageable);
 
-    Page<Product> findByCategoryAndNameContaining(String category, String search, Pageable pageable);
+    public Optional<Product> findById(UUID id);
 
-    Optional<Product> findById(Long id);
+    public List<String> findAllCategories();
 
-    List<String> findAllCategories();
+    public Product save(Product product);
 
-    Product save(Product product);
+    public Product saveFromDto(ProductDto dto);
 
-    Product saveFromDto(ProductDto productDto);
+    public void deactivateProduct(UUID productId);
 
-    void deleteById(Long id);
+    public void deleteById(UUID id);
+
+    public Page<Product> findAll(Pageable pageable);
+
+    public void setQuantityState(UUID productId, String quantityState);
 }

@@ -7,14 +7,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID; // Добавлен для типа UUID
 
 @Repository
-public interface CartRepository extends JpaRepository<ShoppingCart, Long> {
+public interface CartRepository extends JpaRepository<ShoppingCart, UUID> {
 
-    Optional<ShoppingCart> findByUserId(Long userId);
+    Optional<ShoppingCart> findByUsername(String username);
 
-    @Query("SELECT c FROM ShoppingCart c LEFT JOIN FETCH c.items WHERE c.userId = :userId")
-    Optional<ShoppingCart> findByUserIdWithItems(@Param("userId") Long userId);
+    @Query("SELECT c FROM ShoppingCart c LEFT JOIN FETCH c.items WHERE c.username = :username")
+    Optional<ShoppingCart> findByUsernameWithItems(@Param("username") String username);
 
-    boolean existsByUserId(Long userId);
+    boolean existsByUsername(String username);
 }

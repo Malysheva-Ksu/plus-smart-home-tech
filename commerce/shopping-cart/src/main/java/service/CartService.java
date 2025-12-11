@@ -1,21 +1,20 @@
 package service;
 
-import model.shoppingCart.CartItem;
-import model.shoppingCart.ShoppingCart;
+import model.shoppingCart.ShoppingCartResponseDto;
 
-import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public interface CartService {
 
-    ShoppingCart getCart(Long userId);
+    public ShoppingCartResponseDto addProductsToCart(String username, Map<UUID, Integer> productList);
 
-    CartItem addItem(Long userId, Long productId, Integer quantity, BigDecimal price);
+    public ShoppingCartResponseDto getCartByUsername(String username);
 
-    CartItem updateItemQuantity(Long userId, Long itemId, Integer quantity);
+    public ShoppingCartResponseDto changeSingleProductQuantity(String username, UUID productId, Integer newQuantity);
 
-    void removeItem(Long userId, Long itemId);
+    public ShoppingCartResponseDto removeProductsFromCart(String username, List<UUID> productIds);
 
-    void clearCart(Long userId);
-
-    CartItem getCartItem(Long userId, Long itemId);
+    public void deactivateCart(String username);
 }

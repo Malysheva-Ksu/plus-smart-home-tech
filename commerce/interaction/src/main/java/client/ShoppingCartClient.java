@@ -1,41 +1,48 @@
 package client;
 
-import model.AddItemRequest;
-import model.shoppingCart.CartItem;
-import model.shoppingCart.ShoppingCart;
-import model.shoppingCart.UpdateQuantityRequest;
+import model.shoppingCart.ShoppingCartResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.cloud.openfeign.FeignClient;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 @FeignClient(name = "shopping-cart", path = "/api/v1/shopping-cart")
 public interface ShoppingCartClient {
 
-    @GetMapping("/{userId}")
-    ResponseEntity<ShoppingCart> getCart(@PathVariable("userId") Long userId);
+    @GetMapping
+    ResponseEntity<ShoppingCartResponseDto> getCart(@RequestParam("username") String username);
 
-    @PostMapping("/{userId}/items")
-    ResponseEntity<CartItem> addItem(@PathVariable("userId") Long userId,
-                                     @RequestBody AddItemRequest request);
+    @PutMapping
+    ResponseEntity<ShoppingCartResponseDto> addProductsToCart(
+            @RequestParam("username") String username,
+            @RequestBody Map<UUID, Integer> productList // Map<UUID, Integer> как тело запроса
+    );
 
-    @PutMapping("/{userId}/items/{itemId}")
-    ResponseEntity<CartItem> updateQuantity(@PathVariable("userId") Long userId,
-                                            @PathVariable("itemId") Long itemId,
-                                            @RequestBody UpdateQuantityRequest request);
+    @DeleteMapping("/item")
+    ResponseEntity<Void> removeItem(
+            @RequestParam("username") String username,
+            @RequestParam("productId") UUID productId
+    );
 
-    @DeleteMapping("/{userId}/items/{itemId}")
-    ResponseEntity<Void> removeItem(@PathVariable("userId") Long userId,
-                                    @PathVariable("itemId") Long itemId);
+    @DeleteMapping
+    ResponseEntity<Void> clearCart(@RequestParam("username") String username);
 
-    @DeleteMapping("/{userId}/items")
-    ResponseEntity<Void> clearCart(@PathVariable("userId") Long userId);
+    @PostMapping("/checkout")
+    ResponseEntity<String> checkout(@RequestParam("username") String username);
 
-    @PostMapping("/{userId}/checkout")
-    ResponseEntity<String> checkout(@PathVariable("userId") Long userId);
+    @GetMapping("/total")
+    ResponseEntity<BigDecimal> getCartTotal(@RequestParam("username") String username);
 
-    @GetMapping("/{userId}/total")
-    ResponseEntity<Double> getCartTotal(@PathVariable("userId") Long userId);
+    @GetMapping("/count")
+    ResponseEntity<Integer> getCartItemCount(@RequestParam("username") String username);
 
-    @GetMapping("/{userId}/count")
-    ResponseEntity<Integer> getCartItemCount(@PathVariable("userId") Long userId);
+    @PostMapping("/remove")
+    ResponseEntity<ShoppingCartResponseDto> removeProductsFromCart(
+            @RequestParam("username") String username,
+            @RequestBody List<UUID> productIds
+    );
 }

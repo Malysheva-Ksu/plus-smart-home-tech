@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.hibernate.annotations.GenericGenerator;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.UUID; // Для типа UUID
 
 @Entity
 @Table(name = "products")
@@ -16,41 +16,29 @@ import java.time.LocalDateTime;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(name = "productId", columnDefinition = "UUID")
+    private UUID productId;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "productName", nullable = false)
+    private String productName;
 
-    @Column(length = 2000)
+    @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "imageSrc", length = 500)
+    private String imageSrc;
+
+    @Column(name = "quantityState", nullable = false, length = 50)
+    private String quantityState;
+
+    @Column(name = "productState", nullable = false, length = 50)
+    private String productState;
+
+    @Column(name = "productCategory", length = 50)
+    private String productCategory;
+
+    @Column(name = "price", nullable = false, precision = 19, scale = 2)
     private BigDecimal price;
-
-    @Column(length = 100)
-    private String category;
-
-    @Column(name = "image_url", length = 500)
-    private String imageUrl;
-
-    @Column(nullable = false)
-    private boolean available = true;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

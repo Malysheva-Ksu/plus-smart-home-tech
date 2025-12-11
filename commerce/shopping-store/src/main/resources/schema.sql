@@ -1,24 +1,12 @@
-\c postgres
-CREATE DATABASE shopping_store;
-\c shopping_store
+DROP TABLE IF EXISTS products
 
-DROP TABLE IF EXISTS shopping_store.products CASCADE;
-DROP TABLE IF EXISTS shopping_store.categories CASCADE;
-
-CREATE TABLE shopping_store.products (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price DECIMAL(10,2) NOT NULL,
-    category_id BIGINT,
-    image_url VARCHAR(500),
-    available BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE shopping_store.categories (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    parent_id BIGINT
-);
+CREATE TABLE products (
+    productId       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    productName     VARCHAR(255)   NOT NULL,
+    description      TEXT           NOT NULL,
+    imageSrc        VARCHAR(500),
+    quantityState   VARCHAR(50)    NOT NULL CHECK (quantityState IN ('ENDED', 'FEW', 'ENOUGH', 'MANY')),
+    productState    VARCHAR(50)    NOT NULL CHECK (productState IN ('ACTIVE', 'DEACTIVATE')),
+    productCategory VARCHAR(50) CHECK (productCategory IN ('LIGHTING', 'CONTROL', 'SENSORS')),
+    price            NUMERIC(19, 2) NOT NULL CHECK (price >= 1)
+    );
