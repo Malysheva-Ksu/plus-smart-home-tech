@@ -1,20 +1,20 @@
 package service;
 
+import model.shoppingCart.CartItemRequest;
 import model.shoppingCart.ShoppingCartResponseDto;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface CartService {
 
-    public ShoppingCartResponseDto addProductsToCart(String username, Map<UUID, Integer> productList);
+    ShoppingCartResponseDto getOrCreateActiveCart(String username);
 
-    public ShoppingCartResponseDto getCartByUsername(String username);
+    ShoppingCartResponseDto addOrUpdateItems(String username, List<CartItemRequest> itemsRequest);
 
     public ShoppingCartResponseDto changeSingleProductQuantity(String username, UUID productId, Integer newQuantity);
 
     public ShoppingCartResponseDto removeProductsFromCart(String username, List<UUID> productIds);
 
-    public void deactivateCart(String username);
+    void deactivateCart(String username);
 }

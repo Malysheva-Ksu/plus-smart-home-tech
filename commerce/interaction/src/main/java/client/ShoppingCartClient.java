@@ -19,7 +19,7 @@ public interface ShoppingCartClient {
     @PutMapping
     ResponseEntity<ShoppingCartResponseDto> addProductsToCart(
             @RequestParam("username") String username,
-            @RequestBody Map<UUID, Integer> productList // Map<UUID, Integer> как тело запроса
+            @RequestBody Map<UUID, Integer> productList
     );
 
     @DeleteMapping("/item")

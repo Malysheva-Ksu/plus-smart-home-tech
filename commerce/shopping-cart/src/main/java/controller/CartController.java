@@ -3,7 +3,6 @@ package controller;
 import jakarta.transaction.Transactional;
 import client.WarehouseServiceClient;
 import client.ProductServiceClient;
-import model.shoppingCart.CartItem;
 import model.shoppingCart.ChangeQuantityRequest;
 import model.shoppingCart.ShoppingCartResponseDto;
 import org.slf4j.Logger;
@@ -44,7 +43,7 @@ public class CartController {
     public ResponseEntity<ShoppingCartResponseDto> getCart(@RequestParam String username) {
         log.info("Getting cart for user: {}", username);
 
-        ShoppingCartResponseDto cartDto = cartService.getCartByUsername(username);
+        ShoppingCartResponseDto cartDto = cartService.getOrCreateActiveCart(username);
         return ResponseEntity.ok(cartDto);
     }
 
@@ -60,35 +59,43 @@ public class CartController {
 
         ShoppingCartResponseDto cartDto = circuitBreaker.run(() -> {
 
-            return cartService.addProductsToCart(username, productList);
+            List<model.shoppingCart.CartItemRequest> itemsRequest = productList.entrySet().stream()
+                    .map(entry -> new model.shoppingCart.CartItemRequest(entry.getKey(), entry.getValue()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            return cartService.addOrUpdateItems(username, itemsRequest);
 
         }, throwable -> {
             log.error("Circuit breaker triggered for addProductsToCart - username: {}, error: {}",
                     username, throwable.getMessage());
-            throw new RuntimeException("Service Unavailable: Unable to add items to cart.");
+            throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Service Unavailable: Unable to add items to cart due to backend service failure.",
+                    throwable
+            );
         });
 
         log.info("Items successfully added/updated in cart: username={}", username);
         return ResponseEntity.status(HttpStatus.OK).body(cartDto);
     }
 
-    @PostMapping("/change-quantity")
-    @Transactional
-    public ResponseEntity<ShoppingCartResponseDto> changeProductQuantity(
-            @RequestParam String username,
-            @RequestBody ChangeQuantityRequest request) {
+@PostMapping("/change-quantity")
+@Transactional
+public ResponseEntity<ShoppingCartResponseDto> changeProductQuantity(
+        @RequestParam String username,
+        @RequestBody ChangeQuantityRequest request) {
 
-        log.info("Changing product quantity: username={}, productId={}, newQuantity={}",
-                username, request.getProductId(), request.getNewQuantity());
+    log.info("Changing product quantity: username={}, productId={}, newQuantity={}",
+            username, request.getProductId(), request.getNewQuantity());
 
-        ShoppingCartResponseDto response = cartService.changeSingleProductQuantity(
-                username,
-                request.getProductId(),
-                request.getNewQuantity()
-        );
+    ShoppingCartResponseDto response = cartService.changeSingleProductQuantity(
+            username,
+            request.getProductId(),
+            request.getNewQuantity()
+    );
 
-        return ResponseEntity.ok(response);
-    }
+    return ResponseEntity.ok(response);
+}
 
     @PostMapping("/remove")
     @Transactional
@@ -114,5 +121,4 @@ public class CartController {
 
         return ResponseEntity.noContent().build();
     }
-
 }

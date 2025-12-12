@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.UUID; // Для типа UUID
 
 @Entity
-@Table(name = "products")
+@Table(name = "store_products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

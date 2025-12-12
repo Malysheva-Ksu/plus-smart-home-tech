@@ -1,4 +1,4 @@
-package dto;
+package model.shoppingCart;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class QuantityUpdateDto {
+@NoArgsConstructor
+public class CartItemRequest {
     private UUID productId;
-    private String quantityState;
+    private Integer quantity;
 }

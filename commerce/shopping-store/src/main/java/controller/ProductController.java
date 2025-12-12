@@ -1,9 +1,9 @@
 package controller;
 
-import dto.ProductDto;
-import dto.QuantityUpdateDto;
 import exception.ProductNotFoundException;
 import model.shoppingStore.Product;
+import model.shoppingStore.ProductDto;
+import model.shoppingStore.QuantityUpdateDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import service.ProductService;
 
 import java.util.List;
-import java.util.UUID; // Добавлен для типа UUID
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/shopping-store")

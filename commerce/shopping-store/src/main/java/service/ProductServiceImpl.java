@@ -1,8 +1,8 @@
 package service;
 
-import dto.ProductDto;
 import exception.ProductNotFoundException;
 import model.shoppingStore.Product;
+import model.shoppingStore.ProductDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID; // Добавлен для типа UUID
+import java.util.UUID;
 
 @Service
 @Transactional

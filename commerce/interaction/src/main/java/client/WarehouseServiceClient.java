@@ -1,22 +1,28 @@
 package client;
 
-import model.warehouse.ReserveRequest;
-import model.warehouse.StockItem;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import model.warehouse.AddQuantityRequest;
+import model.warehouse.NewProductRequest;
+import model.warehouse.StockItemResponse;
+import model.warehouse.WarehouseAddressDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @FeignClient(name = "warehouse", path = "/api/v1/warehouse")
 public interface WarehouseServiceClient {
 
     @GetMapping("/stock/{productId}")
-    StockItem getStock(@PathVariable("productId") Long productId);
+    ResponseEntity<StockItemResponse> getStock(@PathVariable("productId") UUID productId);
 
-    @PostMapping("/reserve")
-    void reserveStock(@RequestBody ReserveRequest request);
+    @GetMapping("/address")
+    ResponseEntity<WarehouseAddressDto> getWarehouseAddress();
 
-    @PostMapping("/release")
-    void releaseStock(@RequestBody ReserveRequest request);
+    @PutMapping
+    ResponseEntity<Void> addNewProduct(@RequestBody NewProductRequest request);
+
+    @PostMapping("/add")
+    ResponseEntity<Void> addStock(@RequestBody AddQuantityRequest request);
+
 }

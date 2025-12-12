@@ -1,229 +1,205 @@
 package service;
 
-import client.ProductServiceClient;
+import client.WarehouseServiceClient;
 import exception.CartNotFoundException;
-import exception.ItemNotInCartException;
-import jakarta.transaction.Transactional;
+import exception.InsufficientStockException;
+import exception.ProductNotFoundException;
 import model.shoppingCart.CartItem;
+import model.shoppingCart.CartItemRequest;
 import model.shoppingCart.ShoppingCart;
 import model.shoppingCart.ShoppingCartResponseDto;
+import model.warehouse.StockItemResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repository.CartItemRepository;
-import repository.CartRepository;
+import repository.ShoppingCartRepository;
+
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
 @Service
-@Transactional
 public class CartServiceImpl implements CartService {
+
     private static final Logger log = LoggerFactory.getLogger(CartServiceImpl.class);
 
-    private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
-    private final ProductServiceClient productServiceClient;
+    private final ShoppingCartRepository cartRepository;
+    private final CartItemRepository itemRepository;
+    private final WarehouseServiceClient warehouseClient;
 
-    public CartServiceImpl(CartRepository cartRepository,
-                           CartItemRepository cartItemRepository,
-                           ProductServiceClient productServiceClient) {
+    public CartServiceImpl(ShoppingCartRepository cartRepository,
+                           CartItemRepository itemRepository,
+                           WarehouseServiceClient warehouseClient) {
         this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.productServiceClient = productServiceClient;
+        this.itemRepository = itemRepository;
+        this.warehouseClient = warehouseClient;
     }
 
     @Override
-    public ShoppingCartResponseDto addProductsToCart(String username, Map<UUID, Integer> productList) {
-        log.debug("Adding/updating products for user: {}", username);
+    @Transactional(readOnly = true)
+    public ShoppingCartResponseDto getOrCreateActiveCart(String username) {
+        log.debug("Attempting to get or create active cart for user: {}", username);
 
-        ShoppingCart cart = getOrCreateCart(username);
-        boolean isUpdated = false;
+        ShoppingCart cart = cartRepository.findByUsernameAndIsActiveTrue(username)
+                .orElseGet(() -> {
+                    log.info("Active cart not found, creating new cart for user: {}", username);
+                    ShoppingCart newCart = new ShoppingCart();
+                    newCart.setUsername(username);
+                    newCart.setTotalAmount(BigDecimal.ZERO);
+                    return cartRepository.save(newCart);
+                });
 
-        for (Map.Entry<UUID, Integer> entry : productList.entrySet()) {
-            UUID productId = entry.getKey();
-            Integer quantity = entry.getValue();
+        return mapToResponse(cart);
+    }
 
-            if (quantity <= 0) {
-                removeItemByProductId(cart, productId);
-                isUpdated = true;
-                continue;
-            }
+    @Override
+    @Transactional
+    public ShoppingCartResponseDto addOrUpdateItems(String username, List<CartItemRequest> itemsRequest) {
+        ShoppingCart cart = cartRepository.findByUsernameAndIsActiveTrue(username)
+                .orElseThrow(() -> new CartNotFoundException("Active cart not found for user: " + username));
 
-            BigDecimal price = getProductPriceFromService(productId);
+        for (CartItemRequest itemRequest : itemsRequest) {
+            UUID productId = itemRequest.getProductId();
+            Integer requestedQuantity = itemRequest.getQuantity();
 
-            Optional<CartItem> existingItemOpt = cartItemRepository.findByCartUsernameAndProductId(username, productId);
+            StockItemResponse stock = checkWarehouseStock(productId, requestedQuantity);
 
-            if (existingItemOpt.isPresent()) {
-                CartItem item = existingItemOpt.get();
-                item.setQuantity(quantity);
-                item.setPrice(price);
-                cartItemRepository.save(item);
-                log.debug("Updated existing item quantity: {}", quantity);
+            Optional<CartItem> existingItem = itemRepository.findByCartAndProductId(cart, productId);
+
+            CartItem item;
+            if (existingItem.isPresent()) {
+                item = existingItem.get();
+                item.setQuantity(requestedQuantity);
+                item.setPrice(stock.getPrice());
             } else {
-                CartItem newItem = new CartItem();
-                newItem.setCart(cart);
-                newItem.setProductId(productId);
-                newItem.setQuantity(quantity);
-                newItem.setPrice(price);
-
-                CartItem savedItem = cartItemRepository.save(newItem);
-                cart.getItems().add(savedItem);
-                log.debug("Created new cart item");
+                item = CartItem.builder()
+                        .cart(cart)
+                        .productId(productId)
+                        .quantity(requestedQuantity)
+                        .price(stock.getPrice())
+                        .build();
+                cart.getItems().add(item);
             }
-            isUpdated = true;
+            itemRepository.save(item);
         }
 
-        if (isUpdated) {
-            updateCartTotal(cart);
-            cartRepository.save(cart);
-        }
+        updateCartTotals(cart);
+        cartRepository.save(cart);
 
-        log.info("Products processed successfully for user: {}", username);
-        return convertToDto(cart);
+        return mapToResponse(cart);
     }
 
     @Override
-    public ShoppingCartResponseDto getCartByUsername(String username) {
-        log.debug("Getting cart for user: {}", username);
+    @Transactional
+    public ShoppingCartResponseDto changeSingleProductQuantity(String username, UUID productId, Integer newQuantity) {
+        ShoppingCart cart = cartRepository.findByUsernameAndIsActiveTrue(username)
+                .orElseThrow(() -> new CartNotFoundException("Active cart not found for user: " + username));
 
+        StockItemResponse stock = checkWarehouseStock(productId, newQuantity);
+
+        CartItem item = itemRepository.findByCartAndProductId(cart, productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found in cart: " + productId));
+
+        if (newQuantity <= 0) {
+            itemRepository.delete(item);
+            cart.getItems().remove(item);
+            log.info("Item removed from cart: productId={}", productId);
+        } else {
+            item.setQuantity(newQuantity);
+            item.setPrice(stock.getPrice());
+            itemRepository.save(item);
+            log.info("Item quantity changed: productId={}, newQuantity={}", productId, newQuantity);
+        }
+
+        updateCartTotals(cart);
+        cartRepository.save(cart);
+
+        return mapToResponse(cart);
+    }
+
+    @Override
+    @Transactional
+    public ShoppingCartResponseDto removeProductsFromCart(String username, List<UUID> productIds) {
+        ShoppingCart cart = cartRepository.findByUsernameAndIsActiveTrue(username)
+                .orElseThrow(() -> new CartNotFoundException("Active cart not found for user: " + username));
+
+        productIds.forEach(productId -> {
+            itemRepository.findByCartAndProductId(cart, productId)
+                    .ifPresent(item -> {
+                        itemRepository.delete(item);
+                        cart.getItems().remove(item);
+                        log.debug("Removed item {} from cart.", productId);
+                    });
+        });
+
+        updateCartTotals(cart);
+        cartRepository.save(cart);
+        return mapToResponse(cart);
+    }
+
+    @Override
+    @Transactional
+    public void deactivateCart(String username) {
         ShoppingCart cart = cartRepository.findByUsername(username)
-                .orElseGet(() -> createNewCart(username));
+                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
 
-        return convertToDto(cart);
+        if (cart.getIsActive()) {
+            cart.setIsActive(false);
+            cartRepository.save(cart);
+            log.info("Cart deactivated for user: {}", username);
+        } else {
+            log.warn("Cart for user {} is already inactive.", username);
+        }
     }
 
-    private ShoppingCart createNewCart(String username) {
-        log.debug("Creating new cart for user: {}", username);
-        ShoppingCart cart = new ShoppingCart();
-        cart.setUsername(username);
-        cart.setTotalAmount(BigDecimal.ZERO);
-        return cartRepository.save(cart);
+
+    private StockItemResponse checkWarehouseStock(UUID productId, Integer requestedQuantity) {
+        ResponseEntity<StockItemResponse> response = warehouseClient.getStock(productId);
+
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            log.warn("Warehouse returned status {} for product {}", response.getStatusCode(), productId);
+            throw new ProductNotFoundException("Product not found in stock: " + productId);
+        }
+
+        StockItemResponse stock = response.getBody();
+
+        if (stock.getQuantity() < requestedQuantity) {
+            log.warn("Insufficient stock for product {}. Requested: {}, Available: {}",
+                    productId, requestedQuantity, stock.getQuantity());
+            throw new InsufficientStockException("Insufficient stock for product " + productId
+                    + ". Available: " + stock.getQuantity());
+        }
+        return stock;
     }
 
-    private ShoppingCart getOrCreateCart(String username) {
-        return cartRepository.findByUsername(username)
-                .orElseGet(() -> createNewCart(username));
+    @Transactional
+    private void updateCartTotals(ShoppingCart cart) {
+        BigDecimal newTotal = cart.getItems().stream()
+                .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        cart.setTotalAmount(newTotal);
+        log.debug("Cart totals updated. New total: {}", newTotal);
     }
 
-    private ShoppingCartResponseDto convertToDto(ShoppingCart cart) {
-        Map<UUID, Integer> productsMap = cart.getItems().stream()
-                .collect(Collectors.toMap(
-                        CartItem::getProductId,
-                        CartItem::getQuantity
-                ));
+    private ShoppingCartResponseDto mapToResponse(ShoppingCart cart) {
+        List<ShoppingCartResponseDto.Item> responseItems = cart.getItems().stream()
+                .map(item -> new ShoppingCartResponseDto.Item(
+                        item.getProductId(),
+                        item.getQuantity(),
+                        item.getPrice()
+                ))
+                .collect(Collectors.toList());
 
         return ShoppingCartResponseDto.builder()
                 .username(cart.getUsername())
                 .totalAmount(cart.getTotalAmount())
-                .products(productsMap)
+                .items(responseItems)
                 .build();
     }
-
-    private BigDecimal getProductPriceFromService(UUID productId) {
-        return BigDecimal.valueOf(100.00);
-    }
-
-    private void removeItemByProductId(ShoppingCart cart, UUID productId) {
-        Optional<CartItem> itemToRemove = cart.getItems().stream()
-                .filter(item -> item.getProductId().equals(productId))
-                .findFirst();
-
-        if (itemToRemove.isPresent()) {
-            cart.getItems().remove(itemToRemove.get());
-            cartItemRepository.delete(itemToRemove.get());
-            log.info("Item removed from cart: username={}, productId={}", cart.getUsername(), productId);
-        }
-    }
-
-    private void updateCartTotal(ShoppingCart cart) {
-        BigDecimal total = cart.getItems().stream()
-                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        cart.setTotalAmount(total);
-        log.debug("Updated cart total: {}", total);
-    }
-
-    @Override
-    public ShoppingCartResponseDto changeSingleProductQuantity(String username, UUID productId, Integer newQuantity) {
-
-        ShoppingCart cart = cartRepository.findByUsername(username)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
-
-        Optional<CartItem> existingItemOpt = cartItemRepository.findByCartUsernameAndProductId(username, productId);
-
-        if (existingItemOpt.isEmpty()) {
-            throw new ItemNotInCartException(productId);
-        }
-
-        CartItem item = existingItemOpt.get();
-
-        if (newQuantity <= 0) {
-            removeItemByProductId(cart, productId);
-        } else {
-            item.setQuantity(newQuantity);
-            cartItemRepository.save(item);
-        }
-
-        updateCartTotal(cart);
-        cartRepository.save(cart);
-
-        return convertToDto(cart);
-    }
-
-    @Override
-    public ShoppingCartResponseDto removeProductsFromCart(String username, List<UUID> productIds) {
-
-        ShoppingCart cart = cartRepository.findByUsernameWithItems(username)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
-
-        boolean removed = false;
-
-        for (UUID productId : productIds) {
-            Optional<CartItem> itemToRemove = cart.getItems().stream()
-                    .filter(item -> item.getProductId().equals(productId))
-                    .findFirst();
-
-            if (itemToRemove.isPresent()) {
-                CartItem item = itemToRemove.get();
-                cart.getItems().remove(item);
-                cartItemRepository.delete(item);
-                removed = true;
-                log.debug("Product removed from cart: {}", productId);
-            } else {
-                log.warn("Attempted to remove product not found in cart: {}", productId);
-            }
-        }
-
-        if (removed) {
-            updateCartTotal(cart);
-            cartRepository.save(cart);
-        }
-
-        return convertToDto(cart);
-    }
-
-    @Override
-    public void deactivateCart(String username) {
-        log.debug("Deactivating cart for user: {}", username);
-
-        ShoppingCart cart = cartRepository.findByUsername(username)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
-
-        cart.setIsActive(false);
-
-        if (!cart.getItems().isEmpty()) {
-            cartItemRepository.deleteAll(cart.getItems());
-            cart.getItems().clear();
-        }
-
-        cart.setTotalAmount(BigDecimal.ZERO);
-        cartRepository.save(cart);
-
-        log.info("Cart successfully deactivated for user: {}", username);
-    }
-
 }

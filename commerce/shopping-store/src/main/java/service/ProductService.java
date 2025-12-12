@@ -1,7 +1,7 @@
 package service;
 
-import dto.ProductDto;
 import model.shoppingStore.Product;
+import model.shoppingStore.ProductDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
