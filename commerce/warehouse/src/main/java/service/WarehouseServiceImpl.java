@@ -1,9 +1,9 @@
 package service;
 
+import config.WarehouseAddressConfig;
 import exception.ProductNotFoundException;
 import model.warehouse.NewProductRequest;
 import model.warehouse.ProductStock;
-import model.warehouse.WarehouseAddressConfig;
 import model.warehouse.WarehouseAddressDto;
 import org.springframework.stereotype.Service;
 import repository.WarehouseRepository;
