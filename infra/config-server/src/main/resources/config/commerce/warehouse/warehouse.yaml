@@ -62,8 +62,7 @@ warehouse:
   address:
     city: Москва
     street: Проспект Мира
-    building: 12А
-    zip-code: 129090
+    house: 12А
 
 resilience4j.circuitbreaker:
   configs:

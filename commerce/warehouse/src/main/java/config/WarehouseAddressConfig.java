@@ -11,16 +11,12 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class WarehouseAddressConfig {
 
-    @NotBlank
     private String country;
 
-    @NotBlank
     private String city;
 
-    @NotBlank
     private String street;
 
-    @NotBlank
     private String house;
 
     private String flat;
