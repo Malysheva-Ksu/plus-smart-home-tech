@@ -6,14 +6,6 @@ spring:
   application:
     name: warehouse
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/warehouse-db
-    username: postgres
-    password: "postgres"
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      connection-timeout: 30000
-      maximum-pool-size: 10
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
