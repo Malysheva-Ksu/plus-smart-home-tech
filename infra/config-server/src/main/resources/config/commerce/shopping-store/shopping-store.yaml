@@ -5,15 +5,6 @@ spring:
   application:
     name: shopping-store
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/shopping-store-db
-    username: postgres
-    password: "postgres"
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      connection-timeout: 30000
-      maximum-pool-size: 10
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
