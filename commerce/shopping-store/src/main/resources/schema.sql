@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS store_products
-
-CREATE TABLE store_products (
+CREATE TABLE IF NOT EXISTS store_products (
     product_Id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     productName     VARCHAR(255)   NOT NULL,
     description      TEXT           NOT NULL,

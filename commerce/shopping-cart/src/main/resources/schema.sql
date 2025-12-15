@@ -1,7 +1,4 @@
-DROP TABLE IF EXISTS shopping_cart_items CASCADE;
-DROP TABLE IF EXISTS shopping_cart CASCADE;
-
-CREATE TABLE shopping_cart (
+CREATE TABLE IF NOT EXISTS shopping_cart (
     id UUID PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -9,7 +6,7 @@ CREATE TABLE shopping_cart (
     last_updated TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE shopping_cart_items (
+CREATE TABLE IF NOT EXISTS shopping_cart_items (
     id UUID PRIMARY KEY,
     cart_id UUID NOT NULL REFERENCES shopping_cart(id),
     product_id UUID NOT NULL,
