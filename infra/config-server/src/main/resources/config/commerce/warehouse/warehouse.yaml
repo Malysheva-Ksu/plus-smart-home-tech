@@ -1,9 +1,13 @@
+server:
+  port: 0
+
+
 spring:
   application:
     name: warehouse
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/warehouse
+    url: jdbc:postgresql://localhost:5432/warehouse-db
     username: postgres
     password: "postgres"
     driver-class-name: org.postgresql.Driver
@@ -19,9 +23,6 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
-
-server:
-  port: 0
 
 logging:
   level:

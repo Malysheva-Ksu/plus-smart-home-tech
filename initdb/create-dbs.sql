@@ -1,4 +1,4 @@
-CREATE DATABASE "analyzer";
-CREATE DATABASE "shopping-store";
-CREATE DATABASE "shopping-cart";
-CREATE DATABASE "warehouse";
+CREATE DATABASE "analyzer-db";
+CREATE DATABASE "shopping-store-db";
+CREATE DATABASE "shopping-cart-db";
+CREATE DATABASE "warehouse-db";
