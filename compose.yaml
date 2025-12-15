@@ -1,116 +1,4 @@
-version: '3.8'
-
 services:
-  discovery-server:
-    build:
-      context: ./discovery-server
-      dockerfile: Dockerfile
-    container_name: discovery-server
-    hostname: discovery-server
-    ports:
-      - "8761:8761"
-    restart: unless-stopped
-    environment:
-      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
-      EUREKA_CLIENT_FETCH_REGISTRY: "false"
-
-  config-server:
-    build:
-      context: ./config-server
-      dockerfile: Dockerfile
-    container_name: config-server
-    hostname: config-server
-    depends_on:
-      discovery-server:
-        condition: service_healthy
-    restart: unless-stopped
-    ports:
-      - "8888:8888"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_PROFILES_ACTIVE: native
-      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS: classpath:config/
-
-  postgres-analyzer:
-    image: postgres:16.1
-    container_name: postgres-analyzer
-    hostname: postgres-analyzer
-    ports:
-      - "5432:5432"
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: analyzer
-      POSTGRES_USER: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    volumes:
-      - postgres_analyzer_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d analyzer"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  postgres-warehouse:
-    image: postgres:16.1
-    container_name: postgres-warehouse
-    hostname: postgres-warehouse
-    ports:
-      - "5433:5432"
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: warehouse
-      POSTGRES_USER: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    volumes:
-      - postgres_warehouse_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d warehouse"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  postgres-shopping-store:
-    image: postgres:16.1
-    container_name: postgres-shopping-store
-    hostname: postgres-shopping-store
-    ports:
-      - "5434:5432"
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: shopping_store
-      POSTGRES_USER: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    volumes:
-      - postgres_shopping_store_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d shopping_store"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  postgres-shopping-cart:
-    image: postgres:16.1
-    container_name: postgres-shopping-cart
-    hostname: postgres-shopping-cart
-    ports:
-      - "5435:5432"
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: shopping_cart
-      POSTGRES_USER: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    volumes:
-      - postgres_shopping_cart_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d shopping_cart"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   kafka:
     image: confluentinc/confluent-local:7.4.3
     hostname: kafka
@@ -128,198 +16,37 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
-    volumes:
-      - kafka_data:/var/lib/kafka/data
-    healthcheck:
-      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:29092" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
 
   kafka-init-topics:
     image: confluentinc/confluent-local:7.4.3
     container_name: kafka-init-topics
     depends_on:
       - kafka
-    command: "bash -c \\
-                'kafka-topics --create --topic telemetry.sensors.v1 \\
-                             --partitions 1 --replication-factor 1 --if-not-exists \\
-                             --bootstrap-server kafka:29092 && \\
-                kafka-topics --create --topic telemetry.snapshots.v1 \\
-                             --partitions 1 --replication-factor 1 --if-not-exists \\
-                             --bootstrap-server kafka:29092 && \\
-                kafka-topics --create --topic telemetry.hubs.v1 \\
-                             --partitions 1 --replication-factor 1 --if-not-exists \\
+    command: "bash -c \
+                'kafka-topics --create --topic telemetry.sensors.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic telemetry.snapshots.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic telemetry.hubs.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
                              --bootstrap-server kafka:29092'"
     init: true
 
-  hub-router:
-    build:
-      context: ./hub-router
-      dockerfile: Dockerfile
-    container_name: hub-router
-    hostname: hub-router
+  db:
+    image: postgres:16.1
+    container_name: smart-home-db
     ports:
-      - "59090:59090"
-    restart: unless-stopped
-
-  analyzer:
-    build:
-      context: ./analyzer
-      dockerfile: Dockerfile
-    container_name: analyzer
-    hostname: analyzer
-    depends_on:
-      postgres-analyzer:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      hub-router:
-        condition: service_started
-      discovery-server:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-    restart: unless-stopped
-    environment:
-      KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
-      DATASOURCE_URL: jdbc:postgresql://postgres-analyzer:5432/analyzer
-      DATASOURCE_USERNAME: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-    command: ["/bin/sh", "-c", "echo 'Waiting for a safe 30 seconds to ensure Kafka broker is fully operational for clients...' && sleep 30 && echo 'Starting Analyzer.' && java -jar /app/app.jar"]
-
-  warehouse:
-    build:
-      context: ./commerce/warehouse
-      dockerfile: Dockerfile
-    container_name: warehouse
-    hostname: warehouse
-    depends_on:
-      postgres-warehouse:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      discovery-server:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-    restart: unless-stopped
-    environment:
-      DATASOURCE_URL: jdbc:postgresql://postgres-warehouse:5432/warehouse
-      DATASOURCE_USERNAME: postgres
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-
-  shopping-store:
-    build:
-      context: ./commerce/shopping-store
-      dockerfile: Dockerfile
-    container_name: shopping-store
-    hostname: shopping-store
-    depends_on:
-      postgres-shopping-store:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      discovery-server:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-    restart: unless-stopped
-    environment:
-      DATASOURCE_URL: jdbc:postgresql://postgres-shopping-store:5432/shopping_store
-      DATASOURCE_USERNAME: postgres
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-
-  shopping-cart:
-    build:
-      context: ./commerce/shopping-cart
-      dockerfile: Dockerfile
-    container_name: shopping-cart
-    hostname: shopping-cart
-    depends_on:
-      postgres-shopping-cart:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      discovery-server:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-    restart: unless-stopped
-    environment:
-      DATASOURCE_URL: jdbc:postgresql://postgres-shopping-cart:5432/shopping_cart
-      DATASOURCE_USERNAME: postgres
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-
-  aggregator:
-    build:
-      context: ./telemetry/aggregator
-      dockerfile: Dockerfile
-    container_name: aggregator
-    hostname: aggregator
-    depends_on:
-      kafka:
-        condition: service_healthy
-      discovery-server:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-    restart: unless-stopped
-    environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-
-  collector:
-    build:
-      context: ./telemetry/collector
-      dockerfile: Dockerfile
-    container_name: collector
-    hostname: collector
-    depends_on:
-      kafka:
-        condition: service_healthy
-      discovery-server:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    restart: unless-stopped
-    environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    ports:
-      - "5050:80"
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      - "5432:5432"
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres-analyzer
-      - postgres-warehouse
-      - postgres-shopping-store
-      - postgres-shopping-cart
-
-volumes:
-  postgres_analyzer_data:
-    driver: local
-  postgres_warehouse_data:
-    driver: local
-  postgres_shopping_store_data:
-    driver: local
-  postgres_shopping_cart_data:
-    driver: local
-  kafka_data:
-    driver: local
-  pgadmin_data:
-    driver: local
+      - ./volumes/postgres:/var/lib/postgresql/data/
+      - ./initdb:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      timeout: 5s
+      interval: 5s
+      retries: 10
