@@ -58,6 +58,13 @@ eureka:
     instance-id: "${spring.application.name}:${random.value}"
     leaseRenewalIntervalInSeconds: 10
 
+warehouse:
+  address:
+    city: Москва
+    street: Проспект Мира
+    building: 12А
+    zip-code: 129090
+
 resilience4j.circuitbreaker:
   configs:
     default:
