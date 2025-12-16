@@ -1,6 +1,6 @@
 package controller;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import model.warehouse.AddQuantityRequest;
 import model.warehouse.NewProductRequest;
 import model.warehouse.WarehouseAddressDto;

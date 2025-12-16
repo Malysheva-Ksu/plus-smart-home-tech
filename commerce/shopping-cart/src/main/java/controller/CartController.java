@@ -3,6 +3,7 @@ package controller;
 import jakarta.transaction.Transactional;
 import client.WarehouseServiceClient;
 import client.ProductServiceClient;
+import model.shoppingCart.CartItemRequest;
 import model.shoppingCart.ChangeQuantityRequest;
 import model.shoppingCart.ShoppingCartResponseDto;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class CartController {
     @Transactional
     public ResponseEntity<ShoppingCartResponseDto> addProductsToCart(
             @RequestParam String username,
-            @RequestBody Map<UUID, Integer> productList) {
+            @RequestBody List<CartItemRequest> productList) {
 
         log.info("Starting update/add items for cart: username={}", username);
 
@@ -59,11 +60,7 @@ public class CartController {
 
         ShoppingCartResponseDto cartDto = circuitBreaker.run(() -> {
 
-            List<model.shoppingCart.CartItemRequest> itemsRequest = productList.entrySet().stream()
-                    .map(entry -> new model.shoppingCart.CartItemRequest(entry.getKey(), entry.getValue()))
-                    .collect(java.util.stream.Collectors.toList());
-
-            return cartService.addOrUpdateItems(username, itemsRequest);
+            return cartService.addOrUpdateItems(username, productList);
 
         }, throwable -> {
             log.error("Circuit breaker triggered for addProductsToCart - username: {}, error: {}",
