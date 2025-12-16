@@ -26,7 +26,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PutMapping
+    @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<Product> createOrUpdateProduct(@RequestBody ProductDto productDto) {
         Product product = productService.saveFromDto(productDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
