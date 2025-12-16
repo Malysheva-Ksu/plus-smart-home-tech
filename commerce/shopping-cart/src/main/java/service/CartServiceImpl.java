@@ -41,6 +41,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public ShoppingCartResponseDto getOrCreateActiveCart(String username) {
         log.debug("Attempting to get or create active cart for user: {}", username);
 
@@ -150,15 +151,19 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void deactivateCart(String username) {
-        ShoppingCart cart = cartRepository.findByUsername(username)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + username));
+        Optional<ShoppingCart> cartOptional = cartRepository.findByUsername(username);
 
-        if (cart.getIsActive()) {
-            cart.setIsActive(false);
-            cartRepository.save(cart);
-            log.info("Cart deactivated for user: {}", username);
+        if (cartOptional.isPresent()) {
+            ShoppingCart cart = cartOptional.get();
+            if (cart.getIsActive()) {
+                cart.setIsActive(false);
+                cartRepository.save(cart);
+                log.info("Cart deactivated for user: {}", username);
+            } else {
+                log.warn("Cart for user {} is already inactive.", username);
+            }
         } else {
-            log.warn("Cart for user {} is already inactive.", username);
+            log.info("No cart found for user {} to deactivate. Considering it already deactivated or non-existent.", username);
         }
     }
 
