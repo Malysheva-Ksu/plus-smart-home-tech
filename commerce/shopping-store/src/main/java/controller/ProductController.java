@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,10 +43,8 @@ public class ProductController {
     @GetMapping("/categories/{productCategory}")
     public ResponseEntity<List<Product>> getProductsByCategory(
             @PathVariable String productCategory,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @PageableDefault(sort = "productName", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productName").ascending());
         Page<Product> productsPage = productService.findByCategory(productCategory, pageable);
 
         return ResponseEntity.ok(productsPage.getContent());
@@ -55,10 +54,8 @@ public class ProductController {
     public ResponseEntity<List<Product>> getProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @PageableDefault(sort = "productName", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productName").ascending());
         Page<Product> productsPage;
 
         if (category != null && search != null) {
@@ -77,11 +74,11 @@ public class ProductController {
     @GetMapping("/page")
     public ResponseEntity<Page<Product>> getProductsPage(
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String search,@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(required = false) String search,
+            @PageableDefault(sort = "productName", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productName").ascending());
         Page<Product> productsPage;
+
         if (category != null && search != null) {
             productsPage = productService.findByCategoryAndNameContaining(category, search, pageable);
         } else if (category != null) {
