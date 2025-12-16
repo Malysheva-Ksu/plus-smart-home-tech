@@ -41,7 +41,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ShoppingCartResponseDto getOrCreateActiveCart(String username) {
         log.debug("Attempting to get or create active cart for user: {}", username);
 
@@ -61,7 +60,13 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public ShoppingCartResponseDto addOrUpdateItems(String username, List<CartItemRequest> itemsRequest) {
         ShoppingCart cart = cartRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new CartNotFoundException("Active cart not found for user: " + username));
+                .orElseGet(() -> {
+                    log.info("Active cart not found for addOrUpdateItems, creating new cart for user: {}", username);
+                    ShoppingCart newCart = new ShoppingCart();
+                    newCart.setUsername(username);
+                    newCart.setTotalAmount(BigDecimal.ZERO);
+                    return cartRepository.save(newCart);
+                });
 
         for (CartItemRequest itemRequest : itemsRequest) {
             UUID productId = itemRequest.getProductId();
