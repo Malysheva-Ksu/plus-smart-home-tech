@@ -5,7 +5,6 @@ import model.shoppingStore.Product;
 import model.shoppingStore.ProductDto;
 import model.shoppingStore.QuantityUpdateDto;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -41,17 +40,17 @@ public class ProductController {
     }
 
     @GetMapping("/categories/{productCategory}")
-    public ResponseEntity<List<Product>> getProductsByCategory(
-            @PathVariable String productCategory,
-            @PageableDefault(sort = "productName", direction = Sort.Direction.ASC) Pageable pageable
+    public ResponseEntity<Page<Product>> getProductsByCategory(
+                                                                @PathVariable String productCategory,
+                                                                @PageableDefault(sort = "productName", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         Page<Product> productsPage = productService.findByCategory(productCategory, pageable);
 
-        return ResponseEntity.ok(productsPage.getContent());
+        return ResponseEntity.ok(productsPage);
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getProducts(
+    public ResponseEntity<Page<Product>> getProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search,
             @PageableDefault(sort = "productName", direction = Sort.Direction.ASC) Pageable pageable
@@ -68,7 +67,7 @@ public class ProductController {
             productsPage = productService.findAll(pageable);
         }
 
-        return ResponseEntity.ok(productsPage.getContent());
+        return ResponseEntity.ok(productsPage);
     }
 
     @GetMapping("/page")
