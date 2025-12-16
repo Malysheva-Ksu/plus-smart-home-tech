@@ -28,6 +28,10 @@ public class WarehouseController {
     @PutMapping
     public ResponseEntity<Void> addNewProduct(@RequestBody NewProductRequest request) {
 
+        if (request.getQuantity() == null) {
+            request.setQuantity(0);
+        }
+
         warehouseService.saveProduct(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -35,6 +39,8 @@ public class WarehouseController {
 
     @PostMapping("/add")
     public ResponseEntity<Void> addProductQuantity(@RequestBody AddQuantityRequest request) {
+
+        Integer qtyToAdd = request.getQuantity() != null ? request.getQuantity() : 0;
 
         warehouseService.addStock(request.getProductId(), request.getQuantity());
 
