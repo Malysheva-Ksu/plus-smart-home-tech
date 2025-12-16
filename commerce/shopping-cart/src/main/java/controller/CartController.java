@@ -52,7 +52,7 @@ public class CartController {
     @Transactional
     public ResponseEntity<ShoppingCartResponseDto> addProductsToCart(
             @RequestParam String username,
-            @RequestBody List<CartItemRequest> productList) {
+            @RequestBody Map<UUID, Integer> productsMap) {
 
         log.info("Starting update/add items for cart: username={}", username);
 
@@ -60,7 +60,11 @@ public class CartController {
 
         ShoppingCartResponseDto cartDto = circuitBreaker.run(() -> {
 
-            return cartService.addOrUpdateItems(username, productList);
+            List<CartItemRequest> itemsRequest = productsMap.entrySet().stream()
+                    .map(entry -> new CartItemRequest(entry.getKey(), entry.getValue()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            return cartService.addOrUpdateItems(username, itemsRequest);
 
         }, throwable -> {
             log.error("Circuit breaker triggered for addProductsToCart - username: {}, error: {}",
