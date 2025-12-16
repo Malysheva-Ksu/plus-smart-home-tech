@@ -18,6 +18,7 @@ import service.CartService;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/api/v1/shopping-cart")
@@ -56,13 +57,13 @@ public class CartController {
 
         log.info("Starting update/add items for cart: username={}", username);
 
+        List<CartItemRequest> itemsRequest = productsMap.entrySet().stream()
+                .map(entry -> new CartItemRequest(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+
         CircuitBreaker circuitBreaker = circuitBreakerFactory.create("shoppingServices");
 
         ShoppingCartResponseDto cartDto = circuitBreaker.run(() -> {
-
-            List<CartItemRequest> itemsRequest = productsMap.entrySet().stream()
-                    .map(entry -> new CartItemRequest(entry.getKey(), entry.getValue()))
-                    .collect(java.util.stream.Collectors.toList());
 
             return cartService.addOrUpdateItems(username, itemsRequest);
 
