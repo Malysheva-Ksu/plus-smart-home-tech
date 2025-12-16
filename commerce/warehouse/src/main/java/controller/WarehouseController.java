@@ -44,7 +44,7 @@ public class WarehouseController {
 
         warehouseService.addStock(request.getProductId(), request.getQuantity());
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
         }
 
 }

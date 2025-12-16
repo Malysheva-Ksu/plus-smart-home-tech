@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import service.CartService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -81,33 +82,35 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(cartDto);
     }
 
-@PostMapping("/change-quantity")
-@Transactional
-public ResponseEntity<ShoppingCartResponseDto> changeProductQuantity(
-        @RequestParam String username,
-        @RequestBody ChangeQuantityRequest request) {
+    @PostMapping("/change-quantity")
+    @Transactional
+    public ResponseEntity<ShoppingCartResponseDto> changeProductQuantity(
+            @RequestParam String username,
+            @RequestBody ChangeQuantityRequest request) {
 
-    log.info("Changing product quantity: username={}, productId={}, newQuantity={}",
-            username, request.getProductId(), request.getNewQuantity());
+        log.info("Changing product quantity: username={}, productId={}, newQuantity={}",
+                username, request.getProductId(), request.getNewQuantity());
 
-    ShoppingCartResponseDto response = cartService.changeSingleProductQuantity(
-            username,
-            request.getProductId(),
-            request.getNewQuantity()
-    );
+        ShoppingCartResponseDto response = cartService.changeSingleProductQuantity(
+                username,
+                request.getProductId(),
+                request.getNewQuantity()
+        );
 
-    return ResponseEntity.ok(response);
-}
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/remove")
     @Transactional
     public ResponseEntity<ShoppingCartResponseDto> removeProductsFromCart(
             @RequestParam String username,
-            @RequestBody List<UUID> productIds) {
+            @RequestBody(required = false) List<UUID> productIds) {
 
         log.info("Removing products from cart: username={}, productIds={}", username, productIds);
 
-        ShoppingCartResponseDto response = cartService.removeProductsFromCart(username, productIds);
+        List<UUID> actualProductIds = productIds != null ? productIds : Collections.emptyList();
+
+        ShoppingCartResponseDto response = cartService.removeProductsFromCart(username, actualProductIds);
 
         return ResponseEntity.ok(response);
     }
