@@ -49,6 +49,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         productStock.setDimensionWidth(request.getDimensionWidth());
         productStock.setDimensionHeight(request.getDimensionHeight());
         productStock.setDimensionDepth(request.getDimensionDepth());
+        productStock.setPrice(request.getPrice());
 
         warehouseRepository.save(productStock);
         log.info("Product stock saved/updated: {}", request.getProductId());
