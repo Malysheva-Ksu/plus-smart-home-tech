@@ -42,7 +42,7 @@ public class ProductStock {
     @Column(name = "dimension_depth", nullable = false)
     private Double dimensionDepth;
 
-    @Column(name = "price")
+    @Column(name = "price", columnDefinition = "numeric(19,2) default 10.00")
     private BigDecimal price;
 
 }

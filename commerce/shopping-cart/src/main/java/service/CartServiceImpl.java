@@ -191,10 +191,10 @@ public class CartServiceImpl implements CartService {
     private void updateCartTotals(ShoppingCart cart) {
         BigDecimal newTotal = cart.getItems().stream()
                 .map(item -> {
-                    BigDecimal price = (item.getPrice() != null) ? item.getPrice() : BigDecimal.ZERO;
+                    BigDecimal price = (item.getPrice() != null) ? item.getPrice() : new BigDecimal("10.00");
                     return price.multiply(new BigDecimal(item.getQuantity()));
                 })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(new BigDecimal("10.00"), BigDecimal::add);
         cart.setTotalAmount(newTotal);
     }
 

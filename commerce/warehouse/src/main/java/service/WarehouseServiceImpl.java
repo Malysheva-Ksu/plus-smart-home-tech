@@ -47,7 +47,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         ProductStock productStock = warehouseRepository.findByProductId(request.getProductId())
                 .orElseGet(ProductStock::new);
 
-        BigDecimal price = request.getPrice() != null ? request.getPrice() : BigDecimal.ZERO;
+        BigDecimal price = request.getPrice() != null ? request.getPrice() : new BigDecimal("10.00");
 
         productStock.setProductId(request.getProductId());
         productStock.setFragile(request.getFragile());
