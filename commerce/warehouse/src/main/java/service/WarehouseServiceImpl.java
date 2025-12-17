@@ -4,6 +4,7 @@ import config.WarehouseAddressConfig;
 import exception.ProductNotFoundException;
 import model.warehouse.NewProductRequest;
 import model.warehouse.ProductStock;
+import model.warehouse.StockItemResponse;
 import model.warehouse.WarehouseAddressDto;
 import org.springframework.stereotype.Service;
 import repository.WarehouseRepository;
@@ -26,6 +27,14 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseAddressDto getAddress() {
         return addressConfig.toDto();
+    }
+
+    @Override
+    public StockItemResponse getStock(UUID productId) {
+        ProductStock stock = warehouseRepository.findByProductId(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productId));
+
+        return new StockItemResponse(stock.getProductId(), stock.getQuantity(), stock.getPrice());
     }
 
     @Override

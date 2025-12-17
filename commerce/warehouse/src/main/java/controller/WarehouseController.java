@@ -1,5 +1,6 @@
 package controller;
 
+import model.warehouse.StockItemResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 import model.warehouse.AddQuantityRequest;
 import model.warehouse.NewProductRequest;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import service.WarehouseService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/v1/warehouse")
@@ -23,6 +26,12 @@ public class WarehouseController {
     public ResponseEntity<WarehouseAddressDto> getWarehouseAddress() {
         WarehouseAddressDto address = warehouseService.getAddress();
         return ResponseEntity.ok(address);
+    }
+
+    @GetMapping("/stock/{productId}")
+    public ResponseEntity<StockItemResponse> getStock(@PathVariable UUID productId) {
+        StockItemResponse stock = warehouseService.getStock(productId);
+        return ResponseEntity.ok(stock);
     }
 
     @PutMapping
@@ -42,7 +51,7 @@ public class WarehouseController {
 
         Integer qtyToAdd = request.getQuantity() != null ? request.getQuantity() : 0;
 
-        warehouseService.addStock(request.getProductId(), request.getQuantity());
+        warehouseService.addStock(request.getProductId(), qtyToAdd);
 
         return ResponseEntity.ok().build();
         }

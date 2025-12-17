@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -40,5 +41,8 @@ public class ProductStock {
 
     @Column(name = "dimension_depth", nullable = false)
     private Double dimensionDepth;
+
+    @Column(name = "price")
+    private BigDecimal price;
 
 }
