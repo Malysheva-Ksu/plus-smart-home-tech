@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import repository.WarehouseRepository;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
@@ -34,7 +35,11 @@ public class WarehouseServiceImpl implements WarehouseService {
         ProductStock stock = warehouseRepository.findByProductId(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productId));
 
-        return new StockItemResponse(stock.getProductId(), stock.getQuantity(), stock.getPrice());
+        return StockItemResponse.builder()
+                .productId(stock.getProductId())
+                .quantity(stock.getQuantity())
+                .price(stock.getPrice() != null ? stock.getPrice() : new BigDecimal("0.00"))
+                .build();
     }
 
     @Override

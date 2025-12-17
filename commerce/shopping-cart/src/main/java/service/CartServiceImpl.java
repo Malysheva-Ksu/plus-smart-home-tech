@@ -190,11 +190,12 @@ public class CartServiceImpl implements CartService {
     @Transactional
     private void updateCartTotals(ShoppingCart cart) {
         BigDecimal newTotal = cart.getItems().stream()
-                .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
+                .map(item -> {
+                    BigDecimal price = (item.getPrice() != null) ? item.getPrice() : BigDecimal.ZERO;
+                    return price.multiply(new BigDecimal(item.getQuantity()));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         cart.setTotalAmount(newTotal);
-        log.debug("Cart totals updated. New total: {}", newTotal);
     }
 
     private ShoppingCartResponseDto mapToResponse(ShoppingCart cart) {
