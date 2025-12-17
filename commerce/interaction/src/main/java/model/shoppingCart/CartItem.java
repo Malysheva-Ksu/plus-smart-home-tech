@@ -1,8 +1,10 @@
 package model.shoppingCart;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID; // Добавлен для типа UUID
@@ -11,6 +13,8 @@ import java.util.UUID; // Добавлен для типа UUID
 @Entity
 @Builder
 @Table(name = "shopping_cart_product")
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartItem {
 
     @Id
@@ -26,7 +30,7 @@ public class CartItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2, nullable = true)
     private BigDecimal price;
 
 }

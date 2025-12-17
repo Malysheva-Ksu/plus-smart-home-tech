@@ -1,9 +1,7 @@
 package model.shoppingCart;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,6 +12,8 @@ import java.util.UUID; // Добавлен для типа UUID
 @Data
 @Entity
 @Table(name = "shopping_cart")
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShoppingCart {
 
     @Id

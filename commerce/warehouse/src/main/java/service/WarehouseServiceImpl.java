@@ -47,6 +47,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         ProductStock productStock = warehouseRepository.findByProductId(request.getProductId())
                 .orElseGet(ProductStock::new);
 
+        BigDecimal price = request.getPrice() != null ? request.getPrice() : BigDecimal.ZERO;
+
         productStock.setProductId(request.getProductId());
         productStock.setFragile(request.getFragile());
         productStock.setQuantity(request.getQuantity());
@@ -54,7 +56,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         productStock.setDimensionWidth(request.getDimensionWidth());
         productStock.setDimensionHeight(request.getDimensionHeight());
         productStock.setDimensionDepth(request.getDimensionDepth());
-        productStock.setPrice(request.getPrice());
+        productStock.setPrice(price);
 
         warehouseRepository.save(productStock);
         log.info("Product stock saved/updated: {}", request.getProductId());

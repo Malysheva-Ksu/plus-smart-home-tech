@@ -5,12 +5,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductDto {
 
     private UUID productId;
@@ -36,8 +40,6 @@ public class ProductDto {
     @Pattern(regexp = "LIGHTING|CONTROL|SENSORS", message = "Invalid category. Must be one of: LIGHTING, CONTROL, SENSORS")
     private String productCategory;
 
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "1.00", inclusive = true, message = "Price must be at least 1.00")
     private BigDecimal price;
 
     public UUID getProductId() {
