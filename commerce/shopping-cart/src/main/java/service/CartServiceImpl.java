@@ -19,6 +19,7 @@ import repository.ShoppingCartRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -199,18 +200,16 @@ public class CartServiceImpl implements CartService {
     }
 
     private ShoppingCartResponseDto mapToResponse(ShoppingCart cart) {
-        List<ShoppingCartResponseDto.Item> responseItems = cart.getItems().stream()
-                .map(item -> new ShoppingCartResponseDto.Item(
-                        item.getProductId(),
-                        item.getQuantity(),
-                        item.getPrice()
-                ))
-                .collect(Collectors.toList());
+        Map<UUID, Integer> productMap = cart.getItems().stream()
+                .collect(Collectors.toMap(
+                        CartItem::getProductId,
+                        CartItem::getQuantity
+                ));
 
         return ShoppingCartResponseDto.builder()
                 .username(cart.getUsername())
                 .totalAmount(cart.getTotalAmount())
-                .items(responseItems)
+                .items(productMap)
                 .build();
     }
 }

@@ -22,7 +22,7 @@ public class ShoppingCartResponseDto {
     private BigDecimal totalAmount;
 
     @JsonProperty("products")
-    private List<Item> items;
+    private Map<UUID, Integer> items;
 
     @Data
     @Builder
