@@ -1,60 +1,23 @@
 spring:
   application:
-    name: analyzer-service
+    name: analyzer
+  config:
+    import: configserver:http://localhost:8888
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        serviceId: config-server
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
 
-  datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/analyzer}
-    username: ${DATASOURCE_USERNAME:postgres}
-    password: ${DATASOURCE_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-
-  sql:
-    init:
-      mode: always
-      separator: "@@"
-
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-
-grpc:
+eureka:
   client:
-    hub-router:
-      address: 'static://localhost:59090'
-      enableKeepAlive: true
-      keepAliveWithoutCalls: true
-      negotiationType: plaintext
-
-app:
-  kafka:
-    topic:
-      snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
-      hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
-    consumer:
-      snapshots:
-        group-id: analyzer-snapshots-group
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: kafka.SensorsSnapshotDeserializer
-        auto-offset-reset: earliest
-      hubs:
-        group-id: analyzer-hubs-group
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: kafka.HubEventDeserializer
-        auto-offset-reset: earliest
-
-logging:
-  level:
-    root: INFO
-    ru.yandex.practicum: DEBUG
-    service: DEBUG
-    processor: DEBUG
-    org.apache.kafka: INFO
-    org.hibernate.SQL: DEBUG
+    registerWithEureka: false
+  instance:
+    preferIpAddress: false
+    hostname: external.host
+  serviceUrl:
+    defaultZone: http://localhost:8761/eureka/

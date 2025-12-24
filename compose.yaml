@@ -1,26 +1,4 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres-analyzer
-    hostname: postgres
-    ports:
-      - "5432:5432"
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: analyzer
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d analyzer"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   kafka:
     image: confluentinc/confluent-local:7.4.3
     hostname: kafka
@@ -31,73 +9,44 @@ services:
     restart: unless-stopped
     environment:
       KAFKA_NODE_ID: 1
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092'
-
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
       KAFKA_JMX_PORT: 9101
-      KAFKA_JMX_HOSTNAME: kafka
-
+      KAFKA_JMX_HOSTNAME: localhost
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
+
+  kafka-init-topics:
+    image: confluentinc/confluent-local:7.4.3
+    container_name: kafka-init-topics
+    depends_on:
+      - kafka
+    command: "bash -c \
+                'kafka-topics --create --topic telemetry.sensors.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic telemetry.snapshots.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic telemetry.hubs.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092'"
+    init: true
+
+  db:
+    image: postgres:16.1
+    container_name: smart-home-db
+    ports:
+      - "5432:5432"
     volumes:
-      - kafka_data:/var/lib/kafka/data
+      - ./volumes/postgres:/var/lib/postgresql/data/
+      - ./initdb:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:29092" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-
-  hub-router:
-    build:
-      context: ./hub-router
-      dockerfile: Dockerfile
-    container_name: hub-router
-    hostname: hub-router
-    ports:
-      - "59090:59090"
-    restart: unless-stopped
-
-  analyzer:
-    build:
-      context: ./analyzer
-      dockerfile: Dockerfile
-    container_name: analyzer
-    depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      hub-router:
-        condition: service_started
-    ports:
-      - "8080:8080"
-    restart: unless-stopped
-    environment:
-      KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
-      DATASOURCE_URL: jdbc:postgresql://postgres:5432/analyzer
-
-    command: ["/bin/sh", "-c", "echo 'Waiting for a safe 30 seconds to ensure Kafka broker is fully operational for clients...' && sleep 30 && echo 'Starting Analyzer.' && java -jar /app/app.jar"]
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    ports:
-      - "5050:80"
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
-    driver: local
-  kafka_data:
-    driver: local
-  pgadmin_data:
-    driver: local
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      timeout: 5s
+      interval: 5s
+      retries: 10
