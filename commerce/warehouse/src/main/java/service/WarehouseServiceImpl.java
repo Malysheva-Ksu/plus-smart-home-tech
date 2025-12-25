@@ -5,7 +5,7 @@ import exception.ProductNotFoundException;
 import model.warehouse.NewProductRequest;
 import model.warehouse.ProductStock;
 import model.warehouse.StockItemResponse;
-import model.warehouse.WarehouseAddressDto;
+import model.warehouse.AddressDto;
 import org.springframework.stereotype.Service;
 import repository.WarehouseRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public WarehouseAddressDto getAddress() {
+    public AddressDto getAddress() {
         return addressConfig.toDto();
     }
 

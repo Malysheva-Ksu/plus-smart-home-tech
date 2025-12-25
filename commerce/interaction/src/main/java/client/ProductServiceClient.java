@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.PutMapping; // Добавлен �
 import org.springframework.web.bind.annotation.RequestBody; // Добавлен для тела запроса
 import org.springframework.cloud.openfeign.FeignClient;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID; // Добавлен для типа UUID
 
 @FeignClient(name = "shopping-store", path = "/api/v1/shopping-store")
@@ -24,4 +26,7 @@ public interface ProductServiceClient {
 
     @GetMapping("/categories")
     List<String> getCategories();
+
+    @GetMapping("/price")
+    Map<UUID, BigDecimal> getProductsPrice(@RequestBody List<UUID> productsIds);
 }
