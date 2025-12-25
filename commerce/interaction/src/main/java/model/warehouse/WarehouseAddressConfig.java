@@ -39,8 +39,8 @@ public class WarehouseAddressConfig {
     public String getFlat() { return flat; }
     public void setFlat(String flat) { this.flat = flat; }
 
-    public WarehouseAddressDto toDto() {
-        return WarehouseAddressDto.builder()
+    public AddressDto toDto() {
+        return AddressDto.builder()
                 .country(this.country)
                 .city(this.city)
                 .street(this.street)

@@ -4,7 +4,7 @@ import model.warehouse.StockItemResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 import model.warehouse.AddQuantityRequest;
 import model.warehouse.NewProductRequest;
-import model.warehouse.WarehouseAddressDto;
+import model.warehouse.AddressDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +23,8 @@ public class WarehouseController {
     }
 
     @GetMapping("/address")
-    public ResponseEntity<WarehouseAddressDto> getWarehouseAddress() {
-        WarehouseAddressDto address = warehouseService.getAddress();
+    public ResponseEntity<AddressDto> getWarehouseAddress() {
+        AddressDto address = warehouseService.getAddress();
         return ResponseEntity.ok(address);
     }
 

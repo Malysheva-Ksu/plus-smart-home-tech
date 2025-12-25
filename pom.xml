@@ -31,6 +31,10 @@
         <module>commerce/shopping-cart</module>
         <module>commerce/shopping-store</module>
         <module>commerce/warehouse</module>
+        <module>infra/gateway</module>
+        <module>commerce/delivery</module>
+        <module>commerce/order</module>
+        <module>commerce/payment</module>
     </modules>
 
     <properties>

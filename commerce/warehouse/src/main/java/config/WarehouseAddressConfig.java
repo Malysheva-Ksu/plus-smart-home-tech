@@ -1,7 +1,6 @@
 package config;
 
-import jakarta.validation.constraints.NotBlank;
-import model.warehouse.WarehouseAddressDto;
+import model.warehouse.AddressDto;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
@@ -36,8 +35,8 @@ public class WarehouseAddressConfig {
     public String getFlat() { return flat; }
     public void setFlat(String flat) { this.flat = flat; }
 
-    public WarehouseAddressDto toDto() {
-        return WarehouseAddressDto.builder()
+    public AddressDto toDto() {
+        return AddressDto.builder()
                 .country(this.country)
                 .city(this.city)
                 .street(this.street)
